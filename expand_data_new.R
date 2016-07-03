@@ -1123,6 +1123,22 @@ df_all = join(df_all, temp[, c("orderTimeNext", "orderDate", "orderTimePrev", "c
               by=c("customerID", "orderDate"))
 
 # holidays
+holidays = c(as.Date('2014-01-01'), 
+             as.Date('2014-04-21'), 
+             as.Date('2014-05-01'),
+             as.Date('2014-05-29'),
+             as.Date('2014-06-09'),
+             as.Date('2014-10-03'),
+             as.Date('2014-12-25'),
+             as.Date('2014-12-26'),
+             as.Date('2015-01-01'),
+             as.Date('2015-04-06'),
+             as.Date('2015-05-01'),
+             as.Date('2015-05-14'),
+             as.Date('2015-05-25'),
+             as.Date('2015-10-03'),
+             as.Date('2015-12-25'),
+             as.Date('2015-12-26'))
 temp = unique(df_all$orderDate)
 near_holi = sapply(temp, function(x) as.integer(any(abs(as.integer(as.Date(x)-holidays))<7)))
 df_all = join(df_all, data.frame(orderDate = temp, near_holi = near_holi), by = c('orderDate'))
