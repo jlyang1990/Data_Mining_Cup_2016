@@ -743,30 +743,19 @@ df_all$quantity_ratio_per_order_color_prod_rrp <- df_all$quantity_per_order_colo
 df_all$quantity_ratio_per_order_size_prod_rrp <- df_all$quantity_per_order_size_prod_rrp / df_all$quantity_per_order_prod_rrp
 
 
-
-
-### Minjie's new features
-# voucherID numeric
-temp = as.numeric(sapply(as.character(df_all$voucherID), function(x) substring(x, 3)))
-temp[df_all$voucherID=='-1'] = -1
-temp[df_all$voucherID=='0'] = 0
-df_all$voucherID = temp
-
-df_all <- data.table(df_all)
-df_all = as.data.frame(df_all)
-###
+#' save transformed data ######################################################################################################
 
 #' customerID contains the information of the date when the account was created
 #' convert articleID, customerID to numeric
-str2num_feats = c('articleID', 'customerID')
+str2num_feats <- c('articleID', 'customerID')
 for (f in str2num_feats) {
   df_all[, f] <- as.numeric(sapply(df_all[, f], function(x) substring(x, 3)))
 }
 
-df_all = subset(df_all, select=-c(orderID, voucherID, price, orderDate, orderDate_ind, first_orderDate, rrp_new, temp_ac, temp_as, temp_cp, temp_sp, temp_csp, temp_pr, temp_cpr, temp_spr, temp_cspr, temp_article_1, temp_as_1, temp_sp_1, temp_pr_1, temp_spr_1, temp_article_234, temp_as_234, temp_sp_234, temp_pr_234, temp_spr_234, temp_article_34, temp_as_34, temp_sp_34, temp_pr_34, temp_spr_34, temp_article_4, temp_as_4, temp_sp_4, temp_pr_4, temp_spr_4))
+#' delete unused features
+df_all <- subset(df_all, select = -c(orderID, price, orderDate, orderDate_ind, first_orderDate, rrp_new, temp_ac, temp_as, temp_cp, temp_sp, temp_csp, temp_pr, temp_cpr, temp_spr, temp_cspr, temp_article_1, temp_as_1, temp_sp_1, temp_pr_1, temp_spr_1, temp_article_234, temp_as_234, temp_sp_234, temp_pr_234, temp_spr_234, temp_article_34, temp_as_34, temp_sp_34, temp_pr_34, temp_spr_34, temp_article_4, temp_as_4, temp_sp_4, temp_pr_4, temp_spr_4))
+df_all <- df_all[, !(names(df_all) %in% OHE_feats)]
 
-df_all = df_all[, !(names(df_all) %in% OHE_feats)]
+df_train_quantity <- df_train$quantity
 
-df_train_quantity = df_train$quantity
-
-save(df_all, y, df_train_quantity, ind_drop, file = paste("feature_data_", feature_type, sep = ""))
+save(df_all, y, df_train_quantity, ind_drop, file = sprintf("feature_data_%s", feature_type))
