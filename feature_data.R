@@ -1,5 +1,6 @@
 #' generate all the features (except the likelihood features due to data leakage) for the training and testing dataset
 #' written by Jilei Yang, Minjie Fan
+#' modified by Jilei Yang
 
 rm(list = ls())
 library(caret)
@@ -66,8 +67,11 @@ df_all$order_year <- as.numeric(order_ymd[, 1])
 df_all$order_month <- as.numeric(order_ymd[, 2])
 df_all$order_day <- as.numeric(order_ymd[, 3])
 df_all$order_weekday <- weekdays(as.Date(df_all$orderDate))
+rm(order_ymd)
 
 #' OHE (one hot encoding)
+df_all$productGroup = as.character(df_all$productGroup)
+df_all$deviceID = as.character(df_all$deviceID)
 OHE_feats <- c('order_weekday', 'sizeCode', 'productGroup', 'deviceID', 'paymentMethod')
 OHE_formula <- paste('~', paste(OHE_feats, collapse = ' + '))
 dummies <- dummyVars(as.formula(OHE_formula), data = df_all)
@@ -163,10 +167,10 @@ df_all$min_rrp_per_order <- tapply(df_all$rrp, df_all$orderID, min)[df_all$order
 #' function to generate item_quantity_index, item_quantity_per_order and item_quantity_ratio_per_order for choice order items (items sharing some similarities in articleID, colorCode, sizeCode, productGroup and rrp)
 ChoiceItemWithinOrder <- function(obj) {
   aggr <- aggregate(rep(1, nrow(df_all)), list(df_all[, sprintf("temp_%s", obj)], df_all$orderID), sum)
-  names(aggr) <- c(sprintf("temp_%s", obj), "orderID", sprintf(obj, "%s_item_quantity_index"))
+  names(aggr) <- c(sprintf("temp_%s", obj), "orderID", sprintf("%s_item_quantity_index", obj))
   df_all <- join(df_all, aggr, by=c(sprintf("temp_%s", obj), "orderID"))
-  df_all[, sprintf(obj, "%s_item_quantity_per_order")] <- tapply(df_all$quantity * (df_all[, sprintf(obj, "%s_item_quantity_index")] > 1), df_all$orderID, sum)[df_all$orderID]
-  df_all[, sprintf(obj, "%s_item_quantity_ratio_per_order")] <- df_all[, sprintf(obj, "%s_item_quantity_per_order")] / df_all$quantity_per_order
+  df_all[, sprintf("%s_item_quantity_per_order", obj)] <- tapply(df_all$quantity * (df_all[, sprintf("%s_item_quantity_index", obj)] > 1), df_all$orderID, sum)[df_all$orderID]
+  df_all[, sprintf("%s_item_quantity_ratio_per_order", obj)] <- df_all[, sprintf("%s_item_quantity_per_order", obj)] / df_all$quantity_per_order
   return(df_all)
 }
 
@@ -186,19 +190,14 @@ df_all$article_item_quantity_ratio_per_order = df_all$article_item_quantity_per_
 
 #' ac item: items with the same articleID and colorCode
 df_all$temp_ac <- apply(cbind(df_all$articleID, df_all$colorCode), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' as item: items with the same articleID and sizeCode
 df_all$temp_as <- apply(cbind(df_all$articleID, df_all$sizeCode), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' cp item: items with the same productGroup and colorCode
 df_all$temp_cp <- apply(cbind(df_all$colorCode, df_all$productGroup), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' sp item: items with the same productGroup and sizeCode
 df_all$temp_sp = apply(cbind(as.character(df_all$sizeCode), df_all$productGroup), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' csp item: items with the same productGroup, colorCode and sizeCode
 df_all$temp_csp <- apply(cbind(df_all$colorCode, as.character(df_all$sizeCode), df_all$productGroup), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' make cluster of rrp for choice order items
 df_all$rrp_new = df_all$rrp
 df_all$rrp_new[df_all$rrp_new==9.95] = 9.99
@@ -211,76 +210,52 @@ df_all$rrp_new[df_all$rrp_new %in% c(39.95, 40)] = 39.99
 df_all$rrp_new[df_all$rrp_new==49.95] = 49.99
 df_all$rrp_new[df_all$rrp_new==59.95] = 59.99
 df_all$rrp_new[df_all$rrp_new==69.95] = 69.99
-
 #' pr item: items with the same rrp and productGroup
 df_all$temp_pr <- apply(cbind(df_all$productGroup, df_all$rrp_new), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' cpr item: items with the same rrp, productGroup and colorCode
 df_all$temp_cpr <- apply(cbind(df_all$colorCode, df_all$productGroup, df_all$rrp_new), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' spr item: items with the same rrp, productGroup and sizeCode
 df_all$temp_spr <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' cspr item: items with the same rrp, productGroup, colorCode and sizeCode
 df_all$temp_cspr <- apply(cbind(df_all$colorCode, as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' article_1 item: items with the same articleID and colorCode_1
 df_all$temp_article_1 <- apply(cbind(df_all$articleID, df_all$colorCode_1), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' as_1 item: items with the same articleID, sizeCode and colorCode_1
 df_all$temp_as_1 <- apply(cbind(df_all$articleID, df_all$sizeCode, df_all$colorCode_1), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' sp_1 item: items with the same productGroup, sizeCode and colorCode_1
 df_all$temp_sp_1 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$colorCode_1), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' pr_1 item: items with the same rrp and productGroup and colorCode_1
 df_all$temp_pr_1 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_1), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' spr_1 item: items with the same rrp, productGroup, sizeCode and colorCode_1
 df_all$temp_spr_1 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_1), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' article_234 item: items with the same articleID and colorCode_234
 df_all$temp_article_234 <- apply(cbind(df_all$articleID, df_all$colorCode_234), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' as_234 item: items with the same articleID, sizeCode and colorCode_234
 df_all$temp_as_234 <- apply(cbind(df_all$articleID, df_all$sizeCode, df_all$colorCode_234), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' sp_234 item: items with the same productGroup, sizeCode and colorCode_234
 df_all$temp_sp_234 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$colorCode_234), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' pr_234 item: items with the same rrp, productGroup and colorCode_234
 df_all$temp_pr_234 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_234), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' spr_234 item: items with the same rrp, productGroup, sizeCode and colorCode_234
 df_all$temp_spr_234 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_234), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' article_34 item: items with the same articleID and colorCode_34
 df_all$temp_article_34 <- apply(cbind(df_all$articleID, df_all$colorCode_34), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' as_34 item: items with the same articleID, sizeCode and colorCode_34
 df_all$temp_as_34 <- apply(cbind(df_all$articleID, df_all$sizeCode, df_all$colorCode_34), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' sp_34 item: items with the same productGroup, sizeCode and colorCode_34
 df_all$temp_sp_34 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$colorCode_34), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' pr_34 item: items with the same rrp, productGroup and colorCode_34
 df_all$temp_pr_34 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_34), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' spr_34 item: items with the same rrp, productGroup, sizeCode and colorCode_34
 df_all$temp_spr_34 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_34), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' article_4 item: items with the same articleID and colorCode_4
 df_all$temp_article_4 <- apply(cbind(df_all$articleID, df_all$colorCode_4), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' as_4 item: items with the same articleID, sizeCode and colorCode_4
 df_all$temp_as_4 <- apply(cbind(df_all$articleID, df_all$sizeCode, df_all$colorCode_4), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' sp_4 item: items with the same productGroup, sizeCode and colorCode_4
 df_all$temp_sp_4 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$colorCode_4), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' pr_4 item: items with the same rrp, productGroup and colorCode_4
 df_all$temp_pr_4 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_4), 1, function(x) paste(x, sep = "", collapse = " "))
-
 #' spr_4 item: items with the same rrp, productGroup, sizeCode and colorCode_4
 df_all$temp_spr_4 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_4), 1, function(x) paste(x, sep = "", collapse = " "))
 
@@ -464,7 +439,7 @@ for(choice_item in choice_item_list) {
 #' article feature ############################################################################################################
 
 #' total frequency of order items per article
-df_all$freq_per_article <- tapply(df_all$quantity, df_all$articleID, length)[adf_all$articleID]
+df_all$freq_per_article <- tapply(df_all$quantity, df_all$articleID, length)[df_all$articleID]
 #' total quantity per article
 df_all$quantity_per_article <- tapply(df_all$quantity, df_all$articleID, sum)[df_all$articleID]
 #' total number of orders per article
@@ -758,4 +733,4 @@ df_all <- df_all[, !(names(df_all) %in% OHE_feats)]
 
 df_train_quantity <- df_train$quantity
 
-save(df_all, y, df_train_quantity, ind_drop, file = sprintf("feature_data_%s", feature_type))
+save(df_all, y, df_train_quantity, ind_drop, file = sprintf("feature_data_%s.RData", feature_type))
