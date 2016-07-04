@@ -29,7 +29,7 @@ y_pred_prob_feat_glm_new = y_pred_prob_feat_test_GLMnet
 
 X_all = cbind(y_pred_prob_feat_xgb_new, y_pred_prob_feat_glm_new, y_pred_prob_feat_dl_new, imp_feat_new)
 
-save(X_all, y, y_index, file="stacking_new.RData")
+save(X_all, y, y_index, ind_drop, file="stacking_new.RData")
 
 
 #generate stacking_old##########################
@@ -58,5 +58,5 @@ y_pred_prob_feat_rf_old = rf_stack
 
 X_all = cbind(y_pred_prob_feat_xgb_old, y_pred_prob_feat_dl_old, y_pred_prob_feat_rf_old, imp_feat_old)
 
-save(X_all, y, y_index, file="stacking_old.RData")
+save(X_all, y, y_index, ind_drop, file="stacking_old.RData")
 

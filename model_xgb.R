@@ -1,4 +1,4 @@
-#' build model using xgboost on training dataset and predict on testing dataset
+#' build model (1st layer) using xgboost on training dataset and predict on testing dataset
 #' written by Minjie Fan
 #' modified by Jilei Yang
 
@@ -168,7 +168,7 @@ y_pred <- round(y_pred_prob)
 
 cat(paste("mean_score =", mean(scores), "sd_score =", sd(scores), '\n'))
 
-#' save results for model stacking
+#' save results from 1st layer model for model stacking
 save_list <- c(drop_feat, drop_gift, drop_low_freq_cust, add_likelihood_cust, add_likelihood_month)
 names(save_list) <- c("drop_feat", "drop_gift", "drop_low_freq_cust", "add_likelihood_cust", "add_likelihood_month")
 file_name <- paste("xgb_result", feature_type, ifelse(length(l[l == T]) == 0, "base", names(l[l == T])), xgb_subsample * 100, xgb_colsample * 100, sep = "_")
