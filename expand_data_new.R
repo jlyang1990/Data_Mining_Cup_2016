@@ -161,8 +161,8 @@ df_all$max_rrp_per_order <- tapply(df_all$rrp, df_all$orderID, max)[df_all$order
 df_all$min_rrp_per_order <- tapply(df_all$rrp, df_all$orderID, min)[df_all$orderID]
 
 #' function to generate item_quantity_index, item_quantity_per_order and item_quantity_ratio_per_order for choice order items (items sharing some similarities in articleID, colorCode, sizeCode, productGroup and rrp)
-choice_item_within_order <- function(temp_obj, obj) {
-  aggr <- aggregate(rep(1, nrow(df_all)), list(temp_obj, df_all$orderID), sum)
+ChoiceItemWithinOrder <- function(obj) {
+  aggr <- aggregate(rep(1, nrow(df_all)), list(df_all[, sprintf("temp_%s", obj)], df_all$orderID), sum)
   names(aggr) <- c(sprintf("temp_%s", obj), "orderID", sprintf(obj, "%s_item_quantity_index"))
   df_all <- join(df_all, aggr, by=c(sprintf("temp_%s", obj), "orderID"))
   df_all[, sprintf(obj, "%s_item_quantity_per_order")] <- tapply(df_all$quantity * (df_all[, sprintf(obj, "%s_item_quantity_index")] > 1), df_all$orderID, sum)[df_all$orderID]
@@ -186,23 +186,18 @@ df_all$article_item_quantity_ratio_per_order = df_all$article_item_quantity_per_
 
 #' ac item: items with the same articleID and colorCode
 df_all$temp_ac <- apply(cbind(df_all$articleID, df_all$colorCode), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_ac, "ac")
 
 #' as item: items with the same articleID and sizeCode
 df_all$temp_as <- apply(cbind(df_all$articleID, df_all$sizeCode), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_as, "as")
 
 #' cp item: items with the same productGroup and colorCode
 df_all$temp_cp <- apply(cbind(df_all$colorCode, df_all$productGroup), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_cp, "cp")
 
 #' sp item: items with the same productGroup and sizeCode
 df_all$temp_sp = apply(cbind(as.character(df_all$sizeCode), df_all$productGroup), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_sp, "sp")
 
 #' csp item: items with the same productGroup, colorCode and sizeCode
 df_all$temp_csp <- apply(cbind(df_all$colorCode, as.character(df_all$sizeCode), df_all$productGroup), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_csp, "csp")
 
 #' make cluster of rrp for choice order items
 df_all$rrp_new = df_all$rrp
@@ -219,99 +214,83 @@ df_all$rrp_new[df_all$rrp_new==69.95] = 69.99
 
 #' pr item: items with the same rrp and productGroup
 df_all$temp_pr <- apply(cbind(df_all$productGroup, df_all$rrp_new), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_pr, "pr")
 
 #' cpr item: items with the same rrp, productGroup and colorCode
 df_all$temp_cpr <- apply(cbind(df_all$colorCode, df_all$productGroup, df_all$rrp_new), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_cpr, "cpr")
 
 #' spr item: items with the same rrp, productGroup and sizeCode
 df_all$temp_spr <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_spr, "spr")
 
 #' cspr item: items with the same rrp, productGroup, colorCode and sizeCode
 df_all$temp_cspr <- apply(cbind(df_all$colorCode, as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_cspr, "cspr")
 
 #' article_1 item: items with the same articleID and colorCode_1
 df_all$temp_article_1 <- apply(cbind(df_all$articleID, df_all$colorCode_1), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_article_1, "article_1")
 
 #' as_1 item: items with the same articleID, sizeCode and colorCode_1
 df_all$temp_as_1 <- apply(cbind(df_all$articleID, df_all$sizeCode, df_all$colorCode_1), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_as_1, "as_1")
 
 #' sp_1 item: items with the same productGroup, sizeCode and colorCode_1
 df_all$temp_sp_1 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$colorCode_1), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_sp_1, "sp_1")
 
 #' pr_1 item: items with the same rrp and productGroup and colorCode_1
 df_all$temp_pr_1 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_1), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_pr_1, "pr_1")
 
 #' spr_1 item: items with the same rrp, productGroup, sizeCode and colorCode_1
 df_all$temp_spr_1 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_1), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_spr_1, "spr_1")
 
 #' article_234 item: items with the same articleID and colorCode_234
 df_all$temp_article_234 <- apply(cbind(df_all$articleID, df_all$colorCode_234), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_article_234, "article_234")
 
 #' as_234 item: items with the same articleID, sizeCode and colorCode_234
 df_all$temp_as_234 <- apply(cbind(df_all$articleID, df_all$sizeCode, df_all$colorCode_234), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_as_234, "as_234")
 
 #' sp_234 item: items with the same productGroup, sizeCode and colorCode_234
 df_all$temp_sp_234 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$colorCode_234), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_sp_234, "sp_234")
 
 #' pr_234 item: items with the same rrp, productGroup and colorCode_234
 df_all$temp_pr_234 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_234), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_pr_234, "pr_234")
 
 #' spr_234 item: items with the same rrp, productGroup, sizeCode and colorCode_234
 df_all$temp_spr_234 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_234), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_spr_234, "spr_234")
 
 #' article_34 item: items with the same articleID and colorCode_34
 df_all$temp_article_34 <- apply(cbind(df_all$articleID, df_all$colorCode_34), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_article_34, "article_34")
 
 #' as_34 item: items with the same articleID, sizeCode and colorCode_34
 df_all$temp_as_34 <- apply(cbind(df_all$articleID, df_all$sizeCode, df_all$colorCode_34), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_as_34, "as_34")
 
 #' sp_34 item: items with the same productGroup, sizeCode and colorCode_34
 df_all$temp_sp_34 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$colorCode_34), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_sp_34, "sp_34")
 
 #' pr_34 item: items with the same rrp, productGroup and colorCode_34
 df_all$temp_pr_34 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_34), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_pr_34, "pr_34")
 
 #' spr_34 item: items with the same rrp, productGroup, sizeCode and colorCode_34
 df_all$temp_spr_34 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_34), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_spr_34, "spr_34")
 
 #' article_4 item: items with the same articleID and colorCode_4
 df_all$temp_article_4 <- apply(cbind(df_all$articleID, df_all$colorCode_4), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_article_4, "article_4")
 
 #' as_4 item: items with the same articleID, sizeCode and colorCode_4
 df_all$temp_as_4 <- apply(cbind(df_all$articleID, df_all$sizeCode, df_all$colorCode_4), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_as_4, "as_4")
 
 #' sp_4 item: items with the same productGroup, sizeCode and colorCode_4
 df_all$temp_sp_4 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$colorCode_4), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_sp_4, "sp_4")
 
 #' pr_4 item: items with the same rrp, productGroup and colorCode_4
 df_all$temp_pr_4 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_4), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_pr_4, "pr_4")
 
 #' spr_4 item: items with the same rrp, productGroup, sizeCode and colorCode_4
 df_all$temp_spr_4 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_4), 1, function(x) paste(x, sep = "", collapse = " "))
-df_all <- choice_item_within_order(df_all$temp_spr_4, "spr_4")
+
+#' choice order item list
+choice_item_list <- c("ac", "as", "cp", "sp", "csp", "pr", "cpr", "spr", "cspr", "article_1", "as_1", "sp_1", "pr_1", "spr_1", "article_234", "as_234", "sp_234", "pr_234", "spr_234", "article_34", "as_34", "sp_34", "pr_34", "spr_34", "article_4", "as_4", "sp_4", "pr_4", "spr_4")
+
+#' implement ChoiceItemWithinOrder to choice order item list
+for(choice_item in choice_item_list) {
+  df_all <- ChoiceItemWithinOrder(choice_item)
+}
 
 
 #' customer feature ##########################################################################################################
@@ -361,7 +340,7 @@ df_all$max_rrp_per_customer <- tapply(df_all$rrp, df_all$customerID, max)[df_all
 df_all$min_rrp_per_customer <- tapply(df_all$rrp, df_all$customerID, min)[df_all$customerID]
 
 #' function to generate total quantity of choice order items per customer, and ratio of quantity of choice order items per customer
-choice_item_per_customer <- function(obj) {
+ChoiceItemPerCustomer <- function(obj) {
   #' total quantity of choice order items per customer
   df_all[, sprintf("%s_item_quantity_per_customer", obj)] <- tapply(df_all$quantity * (df_all[, sprintf("%s_item_quantity_index", obj)] > 1), df_all$customerID, sum)[df_all$customerID]
   #' ratio of quantity of choice order items per customer
@@ -369,36 +348,11 @@ choice_item_per_customer <- function(obj) {
   return(df_all)
 }
 
-df_all <- choice_item_per_customer("article")
-df_all <- choice_item_per_customer("ac")
-df_all <- choice_item_per_customer("as")
-df_all <- choice_item_per_customer("cp")
-df_all <- choice_item_per_customer("sp")
-df_all <- choice_item_per_customer("csp")
-df_all <- choice_item_per_customer("pr")
-df_all <- choice_item_per_customer("cpr")
-df_all <- choice_item_per_customer("spr")
-df_all <- choice_item_per_customer("cspr")
-df_all <- choice_item_per_customer("article_1")
-df_all <- choice_item_per_customer("as_1")
-df_all <- choice_item_per_customer("sp_1")
-df_all <- choice_item_per_customer("pr_1")
-df_all <- choice_item_per_customer("spr_1")
-df_all <- choice_item_per_customer("article_234")
-df_all <- choice_item_per_customer("as_234")
-df_all <- choice_item_per_customer("sp_234")
-df_all <- choice_item_per_customer("pr_234")
-df_all <- choice_item_per_customer("spr_234")
-df_all <- choice_item_per_customer("article_34")
-df_all <- choice_item_per_customer("as_34")
-df_all <- choice_item_per_customer("sp_34")
-df_all <- choice_item_per_customer("pr_34")
-df_all <- choice_item_per_customer("spr_34")
-df_all <- choice_item_per_customer("article_4")
-df_all <- choice_item_per_customer("as_4")
-df_all <- choice_item_per_customer("sp_4")
-df_all <- choice_item_per_customer("pr_4")
-df_all <- choice_item_per_customer("spr_4")
+#' implement ChoiceItemPerCustomer to choice order item list
+df_all <- ChoiceItemPerCustomer("article")
+for(choice_item in choice_item_list) {
+  df_all <- ChoiceItemPerCustomer(choice_item)
+}
 
 #' mean, max and min frequency of a single article per customer
 temp <- tapply(df_all$articleID, df_all$customerID, function(x) table(x))
@@ -475,7 +429,7 @@ df_all$max_order_discounted_ratio_per_customer <- tapply(df_all$discounted_ratio
 df_all$min_order_discounted_ratio_per_customer <- tapply(df_all$discounted_ratio_per_order, df_all$customerID, min)[df_all$customerID]
 
 #' function to generate mean, max and min quantity of choice order items in a single order per customer, and max and min quantity ratio of choice order items in a single order per customer
-choice_item_within_order_per_customer <- function(obj) {
+ChoiceItemWithinOrderPerCustomer <- function(obj) {
   #' mean, max and min quantity of choice order items in a single order per customer
   df_all[, sprintf("mean_order_%s_item_quantity_per_customer", obj)] = df_all[, sprintf("%s_item_quantity_per_customer", obj)] / df_all$order_per_customer
   df_all[, sprintf("max_order_%s_item_quantity_per_customer", obj)] = tapply(df_all[, sprintf("%s_item_quantity_per_order", obj)], df_all$customerID, max)[df_all$customerID]
@@ -501,35 +455,10 @@ df_all$min_order_article_item_quantity_per_customer <- tapply(df_all$article_ite
 df_all$max_order_article_item_quantity_ratio_per_customer <- tapply(df_all$article_item_quantity_ratio_per_order, df_all$customerID, max)[df_all$customerID]
 df_all$min_order_article_item_quantity_ratio_per_customer <- tapply(df_all$article_item_quantity_ratio_per_order, df_all$customerID, min)[df_all$customerID]
 
-df_all <- choice_item_within_order_per_customer("ac")
-df_all <- choice_item_within_order_per_customer("as")
-df_all <- choice_item_within_order_per_customer("cp")
-df_all <- choice_item_within_order_per_customer("sp")
-df_all <- choice_item_within_order_per_customer("csp")
-df_all <- choice_item_within_order_per_customer("pr")
-df_all <- choice_item_within_order_per_customer("cpr")
-df_all <- choice_item_within_order_per_customer("spr")
-df_all <- choice_item_within_order_per_customer("cspr")
-df_all <- choice_item_within_order_per_customer("article_1")
-df_all <- choice_item_within_order_per_customer("as_1")
-df_all <- choice_item_within_order_per_customer("sp_1")
-df_all <- choice_item_within_order_per_customer("pr_1")
-df_all <- choice_item_within_order_per_customer("spr_1")
-df_all <- choice_item_within_order_per_customer("article_234")
-df_all <- choice_item_within_order_per_customer("as_234")
-df_all <- choice_item_within_order_per_customer("sp_234")
-df_all <- choice_item_within_order_per_customer("pr_234")
-df_all <- choice_item_within_order_per_customer("spr_234")
-df_all <- choice_item_within_order_per_customer("article_34")
-df_all <- choice_item_within_order_per_customer("as_34")
-df_all <- choice_item_within_order_per_customer("sp_34")
-df_all <- choice_item_within_order_per_customer("pr_34")
-df_all <- choice_item_within_order_per_customer("spr_34")
-df_all <- choice_item_within_order_per_customer("article_4")
-df_all <- choice_item_within_order_per_customer("as_4")
-df_all <- choice_item_within_order_per_customer("sp_4")
-df_all <- choice_item_within_order_per_customer("pr_4")
-df_all <- choice_item_within_order_per_customer("spr_4")
+#' implement ChoiceItemWithinOrderPerCustomer to choice order item list
+for(choice_item in choice_item_list) {
+  df_all <- ChoiceItemWithinOrderPerCustomer(choice_item)
+}
 
 
 #' article feature ############################################################################################################
@@ -589,7 +518,7 @@ df_all <- join(df_all, temp[, c("orderTimeNext", "orderDate", "orderTimePrev", "
 #' function to generate time difference between choice order items across order per customer
 orderDate_dic <- tapply(as.Date(df_all$orderDate), df_all$orderID, unique)
 
-choice_item_across_order <- function(temp_obj, obj){
+ChoiceItemAcrossOrder <- function(temp_obj, obj){
   
   df_all$temp <- temp_obj
   aggr <- aggregate(df_all$quantity, list(df_all$customerID, df_all$temp, df_all$orderID), sum)
@@ -620,40 +549,15 @@ choice_item_across_order <- function(temp_obj, obj){
   return(df_all)
 }
 
-df_all <- choice_item_across_order(df_all$articleID, "article")
-df_all <- choice_item_across_order(df_all$temp_ac, "ac")
-df_all <- choice_item_across_order(df_all$temp_as, "as")
-df_all <- choice_item_across_order(df_all$temp_cp, "cp")
-df_all <- choice_item_across_order(df_all$temp_sp, "sp")
-df_all <- choice_item_across_order(df_all$temp_csp, "csp")
-df_all <- choice_item_across_order(df_all$temp_pr, "pr")
-df_all <- choice_item_across_order(df_all$temp_cpr, "cpr")
-df_all <- choice_item_across_order(df_all$temp_spr, "spr")
-df_all <- choice_item_across_order(df_all$temp_cspr, "cspr")
-df_all <- choice_item_across_order(df_all$temp_article_1, "article_1")
-df_all <- choice_item_across_order(df_all$temp_as_1, "as_1")
-df_all <- choice_item_across_order(df_all$temp_sp_1, "sp_1")
-df_all <- choice_item_across_order(df_all$temp_pr_1, "pr_1")
-df_all <- choice_item_across_order(df_all$temp_spr_1, "spr_1")
-df_all <- choice_item_across_order(df_all$temp_article_234, "article_234")
-df_all <- choice_item_across_order(df_all$temp_as_234, "as_234")
-df_all <- choice_item_across_order(df_all$temp_sp_234, "sp_234")
-df_all <- choice_item_across_order(df_all$temp_pr_234, "pr_234")
-df_all <- choice_item_across_order(df_all$temp_spr_234, "spr_234")
-df_all <- choice_item_across_order(df_all$temp_article_34, "article_34")
-df_all <- choice_item_across_order(df_all$temp_as_34, "as_34")
-df_all <- choice_item_across_order(df_all$temp_sp_34, "sp_34")
-df_all <- choice_item_across_order(df_all$temp_pr_34, "pr_34")
-df_all <- choice_item_across_order(df_all$temp_spr_34, "spr_34")
-df_all <- choice_item_across_order(df_all$temp_article_4, "article_4")
-df_all <- choice_item_across_order(df_all$temp_as_4, "as_4")
-df_all <- choice_item_across_order(df_all$temp_sp_4, "sp_4")
-df_all <- choice_item_across_order(df_all$temp_pr_4, "pr_4")
-df_all <- choice_item_across_order(df_all$temp_spr_4, "spr_4")
+#' implement ChoiceItemAcrossOrder to choice order item list
+df_all <- ChoiceItemAcrossOrder(df_all$articleID, "article")
+for(choice_item in choice_item_list) {
+  df_all <- ChoiceItemAcrossOrder(df_all[, sprintf("temp_%s", choice_item)], choice_item)
+}
 temp <- apply(cbind(df_all$articleID, df_all$colorCode, df_all$sizeCode), 1, function(x) paste(x, sep="", collapse=" "))
-df_all <- choice_item_across_order(temp, "acs")
+df_all <- ChoiceItemAcrossOrder(temp, "acs")
 temp <- apply(cbind(df_all$articleID, df_all$colorCode, df_all$sizeCode, df_all$price), 1, function(x) paste(x, sep="", collapse=" "))
-df_all <- choice_item_across_order(temp, "acsp")
+df_all <- ChoiceItemAcrossOrder(temp, "acsp")
 
 #' num of device per customer per date
 df_all <- data.table(df_all)
@@ -686,157 +590,157 @@ df_all$rightaway_ind <- payment_new=="RIGHTAWAY"
 
 #' two way table #############################################################################################################
 
-# quantity per customerID and articleID
-temp = aggregate(df_all$quantity, list(df_all$customerID, df_all$articleID), sum)
-names(temp) = c("customerID", "articleID", "quantity_per_customer_article")
-df_all = join(df_all, temp, by=c("customerID", "articleID"))
-# quantity per customerID and productGroup
-temp = aggregate(df_all$quantity, list(df_all$customerID, df_all$productGroup), sum)
-names(temp) = c("customerID", "productGroup", "quantity_per_customer_prod")
-df_all = join(df_all, temp, by=c("customerID", "productGroup"))
-# quantity per customerID, productGroup and rrp
-temp = aggregate(df_all$quantity, list(df_all$customerID, df_all$productGroup, df_all$rrp), sum)
-names(temp) = c("customerID", "productGroup", "rrp", "quantity_per_customer_prod_rrp")
-df_all = join(df_all, temp, by=c("customerID", "productGroup", "rrp"))
-# quantity per customerID and colorCode
-temp = aggregate(df_all$quantity, list(df_all$customerID, df_all$colorCode), sum)
-names(temp) = c("customerID", "colorCode", "quantity_per_customer_color")
-df_all = join(df_all, temp, by=c("customerID", "colorCode"))
-# quantity per customerID and sizeCode
-temp = aggregate(df_all$quantity, list(df_all$customerID, df_all$sizeCode), sum)
-names(temp) = c("customerID", "sizeCode", "quantity_per_customer_size")
-df_all = join(df_all, temp, by=c("customerID", "sizeCode"))
+#' quantity per customerID and articleID
+temp <- aggregate(df_all$quantity, list(df_all$customerID, df_all$articleID), sum)
+names(temp) <- c("customerID", "articleID", "quantity_per_customer_article")
+df_all <- join(df_all, temp, by = c("customerID", "articleID"))
+#' quantity per customerID and productGroup
+temp <- aggregate(df_all$quantity, list(df_all$customerID, df_all$productGroup), sum)
+names(temp) <- c("customerID", "productGroup", "quantity_per_customer_prod")
+df_all <- join(df_all, temp, by = c("customerID", "productGroup"))
+#' quantity per customerID, productGroup and rrp
+temp <- aggregate(df_all$quantity, list(df_all$customerID, df_all$productGroup, df_all$rrp), sum)
+names(temp) <- c("customerID", "productGroup", "rrp", "quantity_per_customer_prod_rrp")
+df_all <- join(df_all, temp, by = c("customerID", "productGroup", "rrp"))
+#' quantity per customerID and colorCode
+temp <- aggregate(df_all$quantity, list(df_all$customerID, df_all$colorCode), sum)
+names(temp) <- c("customerID", "colorCode", "quantity_per_customer_color")
+df_all <- join(df_all, temp, by = c("customerID", "colorCode"))
+#' quantity per customerID and sizeCode
+temp <- aggregate(df_all$quantity, list(df_all$customerID, df_all$sizeCode), sum)
+names(temp) <- c("customerID", "sizeCode", "quantity_per_customer_size")
+df_all <- join(df_all, temp, by = c("customerID", "sizeCode"))
 
-# price per customerID and articleID
-temp = aggregate(df_all$price, list(df_all$customerID, df_all$articleID), sum)
-names(temp) = c("customerID", "articleID", "price_per_customer_article")
-df_all = join(df_all, temp, by=c("customerID", "articleID"))
-# price per customerID and productGroup
-temp = aggregate(df_all$price, list(df_all$customerID, df_all$productGroup), sum)
-names(temp) = c("customerID", "productGroup", "price_per_customer_prod")
-df_all = join(df_all, temp, by=c("customerID", "productGroup"))
-# price per customerID, productGroup and rrp
-temp = aggregate(df_all$price, list(df_all$customerID, df_all$productGroup, df_all$rrp), sum)
-names(temp) = c("customerID", "productGroup", "rrp", "price_per_customer_prod_rrp")
-df_all = join(df_all, temp, by=c("customerID", "productGroup", "rrp"))
-# price per customerID and colorCode
-temp = aggregate(df_all$price, list(df_all$customerID, df_all$colorCode), sum)
-names(temp) = c("customerID", "colorCode", "price_per_customer_color")
-df_all = join(df_all, temp, by=c("customerID", "colorCode"))
-# price per customerID and sizeCode
-temp = aggregate(df_all$price, list(df_all$customerID, df_all$sizeCode), sum)
-names(temp) = c("customerID", "sizeCode", "price_per_customer_size")
-df_all = join(df_all, temp, by=c("customerID", "sizeCode"))
+#' price per customerID and articleID
+temp <- aggregate(df_all$price, list(df_all$customerID, df_all$articleID), sum)
+names(temp) <- c("customerID", "articleID", "price_per_customer_article")
+df_all <- join(df_all, temp, by = c("customerID", "articleID"))
+#' price per customerID and productGroup
+temp <- aggregate(df_all$price, list(df_all$customerID, df_all$productGroup), sum)
+names(temp) <- c("customerID", "productGroup", "price_per_customer_prod")
+df_all <- join(df_all, temp, by = c("customerID", "productGroup"))
+#' price per customerID, productGroup and rrp
+temp <- aggregate(df_all$price, list(df_all$customerID, df_all$productGroup, df_all$rrp), sum)
+names(temp) <- c("customerID", "productGroup", "rrp", "price_per_customer_prod_rrp")
+df_all <- join(df_all, temp, by = c("customerID", "productGroup", "rrp"))
+#' price per customerID and colorCode
+temp <- aggregate(df_all$price, list(df_all$customerID, df_all$colorCode), sum)
+names(temp) <- c("customerID", "colorCode", "price_per_customer_color")
+df_all <- join(df_all, temp, by = c("customerID", "colorCode"))
+#' price per customerID and sizeCode
+temp <- aggregate(df_all$price, list(df_all$customerID, df_all$sizeCode), sum)
+names(temp) <- c("customerID", "sizeCode", "price_per_customer_size")
+df_all <- join(df_all, temp, by = c("customerID", "sizeCode"))
 
-# discounted price per customerID and articleID
-temp = aggregate(df_all$discounted_price_per_quantity*df_all$quantity, list(df_all$customerID, df_all$articleID), sum)
-names(temp) = c("customerID", "articleID", "discounted_price_per_customer_article")
-df_all = join(df_all, temp, by=c("customerID", "articleID"))
-# discounted price per customerID and productGroup
-temp = aggregate(df_all$discounted_price_per_quantity*df_all$quantity, list(df_all$customerID, df_all$productGroup), sum)
-names(temp) = c("customerID", "productGroup", "discounted_price_per_customer_prod")
-df_all = join(df_all, temp, by=c("customerID", "productGroup"))
-# discounted price per customerID, productGroup and rrp
-temp = aggregate(df_all$discounted_price_per_quantity*df_all$quantity, list(df_all$customerID, df_all$productGroup, df_all$rrp), sum)
-names(temp) = c("customerID", "productGroup", "rrp", "discounted_price_per_customer_prod_rrp")
-df_all = join(df_all, temp, by=c("customerID", "productGroup", "rrp"))
-# discounted price per customerID and colorCode
-temp = aggregate(df_all$discounted_price_per_quantity*df_all$quantity, list(df_all$customerID, df_all$colorCode), sum)
-names(temp) = c("customerID", "colorCode", "discounted_price_per_customer_color")
-df_all = join(df_all, temp, by=c("customerID", "colorCode"))
-# discounted price per customerID and sizeCode
-temp = aggregate(df_all$discounted_price_per_quantity*df_all$quantity, list(df_all$customerID, df_all$sizeCode), sum)
-names(temp) = c("customerID", "sizeCode", "discounted_price_per_customer_size")
-df_all = join(df_all, temp, by=c("customerID", "sizeCode"))
+#' discounted price per customerID and articleID
+temp <- aggregate(df_all$discounted_price_per_quantity * df_all$quantity, list(df_all$customerID, df_all$articleID), sum)
+names(temp) <- c("customerID", "articleID", "discounted_price_per_customer_article")
+df_all <- join(df_all, temp, by = c("customerID", "articleID"))
+#' discounted price per customerID and productGroup
+temp <- aggregate(df_all$discounted_price_per_quantity * df_all$quantity, list(df_all$customerID, df_all$productGroup), sum)
+names(temp) <- c("customerID", "productGroup", "discounted_price_per_customer_prod")
+df_all <- join(df_all, temp, by = c("customerID", "productGroup"))
+#' discounted price per customerID, productGroup and rrp
+temp <- aggregate(df_all$discounted_price_per_quantity * df_all$quantity, list(df_all$customerID, df_all$productGroup, df_all$rrp), sum)
+names(temp) <- c("customerID", "productGroup", "rrp", "discounted_price_per_customer_prod_rrp")
+df_all <- join(df_all, temp, by = c("customerID", "productGroup", "rrp"))
+#' discounted price per customerID and colorCode
+temp <- aggregate(df_all$discounted_price_per_quantity * df_all$quantity, list(df_all$customerID, df_all$colorCode), sum)
+names(temp) <- c("customerID", "colorCode", "discounted_price_per_customer_color")
+df_all <- join(df_all, temp, by = c("customerID", "colorCode"))
+#' discounted price per customerID and sizeCode
+temp <- aggregate(df_all$discounted_price_per_quantity * df_all$quantity, list(df_all$customerID, df_all$sizeCode), sum)
+names(temp) <- c("customerID", "sizeCode", "discounted_price_per_customer_size")
+df_all <- join(df_all, temp, by = c("customerID", "sizeCode"))
 
-# quantity per orderID and article ID
-temp = aggregate(df_all$quantity, list(df_all$orderID, df_all$articleID), sum)
-names(temp) = c("orderID", "articleID", "quantity_per_order_article")
-df_all = join(df_all, temp, by=c("orderID", "articleID"))
-# quantity per orderID and productGroup
-temp = aggregate(df_all$quantity, list(df_all$orderID, df_all$productGroup), sum)
-names(temp) = c("orderID", "productGroup", "quantity_per_order_prod")
-df_all = join(df_all, temp, by=c("orderID", "productGroup"))
-# quantity per orderID, productGroup and rrp
-temp = aggregate(df_all$quantity, list(df_all$orderID, df_all$productGroup, df_all$rrp), sum)
-names(temp) = c("orderID", "productGroup", "rrp", "quantity_per_order_prod_rrp")
-df_all = join(df_all, temp, by=c("orderID", "productGroup", "rrp"))
+#' quantity per orderID and article ID
+temp <- aggregate(df_all$quantity, list(df_all$orderID, df_all$articleID), sum)
+names(temp) <- c("orderID", "articleID", "quantity_per_order_article")
+df_all <- join(df_all, temp, by = c("orderID", "articleID"))
+#' quantity per orderID and productGroup
+temp <- aggregate(df_all$quantity, list(df_all$orderID, df_all$productGroup), sum)
+names(temp) <- c("orderID", "productGroup", "quantity_per_order_prod")
+df_all <- join(df_all, temp, by = c("orderID", "productGroup"))
+#' quantity per orderID, productGroup and rrp
+temp <- aggregate(df_all$quantity, list(df_all$orderID, df_all$productGroup, df_all$rrp), sum)
+names(temp) <- c("orderID", "productGroup", "rrp", "quantity_per_order_prod_rrp")
+df_all <- join(df_all, temp, by = c("orderID", "productGroup", "rrp"))
 
-# number of orders per customerID and orderDate
-temp = aggregate(df_all$quantity, list(df_all$customerID, df_all$orderDate, df_all$orderID), sum)
-names(temp) = c('customerID', 'orderDate', 'orderID', 'quantity_per_customer_orderDate_orderID') 
-# it is extremely slow when working on factor or character
-temp = aggregate(temp$quantity_per_customer_orderDate_orderID, list(temp$customerID, temp$orderDate), length)
-names(temp) = c('customerID', 'orderDate', 'num_of_order_per_customer_orderDate')
-df_all = join(df_all, temp, by=c('customerID', 'orderDate'))
+#' number of orders per customerID and orderDate
+temp <- aggregate(df_all$quantity, list(df_all$customerID, df_all$orderDate, df_all$orderID), sum)
+names(temp) <- c('customerID', 'orderDate', 'orderID', 'quantity_per_customer_orderDate_orderID') 
+temp <- aggregate(temp$quantity_per_customer_orderDate_orderID, list(temp$customerID, temp$orderDate), length)
+names(temp) <- c('customerID', 'orderDate', 'num_of_order_per_customer_orderDate')
+df_all <- join(df_all, temp, by = c('customerID', 'orderDate'))
 
 #' three way table ###########################################################################################################
 
-# quantity per customerID, colorCode and productGroup
-temp = aggregate(df_all$quantity, list(df_all$customerID, df_all$colorCode, df_all$productGroup), sum)
-names(temp) = c("customerID", "colorCode", "productGroup", "quantity_per_customer_color_prod")
-df_all = join(df_all, temp, by=c("customerID", "colorCode", "productGroup"))
-# quantity per customerID, sizeCode and productGroup
-temp = aggregate(df_all$quantity, list(df_all$customerID, df_all$sizeCode, df_all$productGroup), sum)
-names(temp) = c("customerID", "sizeCode", "productGroup", "quantity_per_customer_size_prod")
-df_all = join(df_all, temp, by=c("customerID", "sizeCode", "productGroup"))
-# quantity per orderID, colorCode and productGroup
-temp = aggregate(df_all$quantity, list(df_all$orderID, df_all$colorCode, df_all$productGroup), sum)
-names(temp) = c("orderID", "colorCode", "productGroup", "quantity_per_order_color_prod")
-df_all = join(df_all, temp, by=c("orderID", "colorCode", "productGroup"))
-# quantity per orderID, sizeCode and productGroup
-temp = aggregate(df_all$quantity, list(df_all$orderID, df_all$sizeCode, df_all$productGroup), sum)
-names(temp) = c("orderID", "sizeCode", "productGroup", "quantity_per_order_size_prod")
-df_all = join(df_all, temp, by=c("orderID", "sizeCode", "productGroup"))
+#' quantity per customerID, colorCode and productGroup
+temp <- aggregate(df_all$quantity, list(df_all$customerID, df_all$colorCode, df_all$productGroup), sum)
+names(temp) <- c("customerID", "colorCode", "productGroup", "quantity_per_customer_color_prod")
+df_all <- join(df_all, temp, by = c("customerID", "colorCode", "productGroup"))
+#' quantity per customerID, sizeCode and productGroup
+temp <- aggregate(df_all$quantity, list(df_all$customerID, df_all$sizeCode, df_all$productGroup), sum)
+names(temp) <- c("customerID", "sizeCode", "productGroup", "quantity_per_customer_size_prod")
+df_all <- join(df_all, temp, by = c("customerID", "sizeCode", "productGroup"))
+#' quantity per orderID, colorCode and productGroup
+temp <- aggregate(df_all$quantity, list(df_all$orderID, df_all$colorCode, df_all$productGroup), sum)
+names(temp) <- c("orderID", "colorCode", "productGroup", "quantity_per_order_color_prod")
+df_all <- join(df_all, temp, by = c("orderID", "colorCode", "productGroup"))
+#' quantity per orderID, sizeCode and productGroup
+temp <- aggregate(df_all$quantity, list(df_all$orderID, df_all$sizeCode, df_all$productGroup), sum)
+names(temp) <- c("orderID", "sizeCode", "productGroup", "quantity_per_order_size_prod")
+df_all <- join(df_all, temp, by = c("orderID", "sizeCode", "productGroup"))
 
-# quantity per customerID, colorCode and articleID
-temp = aggregate(df_all$quantity, list(df_all$customerID, df_all$colorCode, df_all$articleID), sum)
-names(temp) = c("customerID", "colorCode", "articleID", "quantity_per_customer_color_article")
-df_all = join(df_all, temp, by=c("customerID", "colorCode", "articleID"))
-# quantity per customerID, sizeCode and articleID
-temp = aggregate(df_all$quantity, list(df_all$customerID, df_all$sizeCode, df_all$articleID), sum)
-names(temp) = c("customerID", "sizeCode", "articleID", "quantity_per_customer_size_article")
-df_all = join(df_all, temp, by=c("customerID", "sizeCode", "articleID"))
-# quantity per orderID, colorCode and articleID
-temp = aggregate(df_all$quantity, list(df_all$orderID, df_all$colorCode, df_all$articleID), sum)
-names(temp) = c("orderID", "colorCode", "articleID", "quantity_per_order_color_article")
-df_all = join(df_all, temp, by=c("orderID", "colorCode", "articleID"))
-# quantity per orderID, sizeCode and articleID
-temp = aggregate(df_all$quantity, list(df_all$orderID, df_all$sizeCode, df_all$articleID), sum)
-names(temp) = c("orderID", "sizeCode", "articleID", "quantity_per_order_size_article")
-df_all = join(df_all, temp, by=c("orderID", "sizeCode", "articleID"))
+#' quantity per customerID, colorCode and articleID
+temp <- aggregate(df_all$quantity, list(df_all$customerID, df_all$colorCode, df_all$articleID), sum)
+names(temp) <- c("customerID", "colorCode", "articleID", "quantity_per_customer_color_article")
+df_all <- join(df_all, temp, by = c("customerID", "colorCode", "articleID"))
+#' quantity per customerID, sizeCode and articleID
+temp <- aggregate(df_all$quantity, list(df_all$customerID, df_all$sizeCode, df_all$articleID), sum)
+names(temp) <- c("customerID", "sizeCode", "articleID", "quantity_per_customer_size_article")
+df_all <- join(df_all, temp, by = c("customerID", "sizeCode", "articleID"))
+#' quantity per orderID, colorCode and articleID
+temp <- aggregate(df_all$quantity, list(df_all$orderID, df_all$colorCode, df_all$articleID), sum)
+names(temp) <- c("orderID", "colorCode", "articleID", "quantity_per_order_color_article")
+df_all <- join(df_all, temp, by = c("orderID", "colorCode", "articleID"))
+#' quantity per orderID, sizeCode and articleID
+temp <- aggregate(df_all$quantity, list(df_all$orderID, df_all$sizeCode, df_all$articleID), sum)
+names(temp) <- c("orderID", "sizeCode", "articleID", "quantity_per_order_size_article")
+df_all <- join(df_all, temp, by = c("orderID", "sizeCode", "articleID"))
 
-# quantity per customerID, colorCode, productGroup and rrp
-temp = aggregate(df_all$quantity, list(df_all$customerID, df_all$colorCode, df_all$productGroup, df_all$rrp), sum)
-names(temp) = c("customerID", "colorCode", "productGroup", "rrp", "quantity_per_customer_color_prod_rrp")
-df_all = join(df_all, temp, by=c("customerID", "colorCode", "productGroup", "rrp"))
-# quantity per customerID, sizeCode, productGroup and rrp
-temp = aggregate(df_all$quantity, list(df_all$customerID, df_all$sizeCode, df_all$productGroup, df_all$rrp), sum)
-names(temp) = c("customerID", "sizeCode", "productGroup", "rrp", "quantity_per_customer_size_prod_rrp")
-df_all = join(df_all, temp, by=c("customerID", "sizeCode", "productGroup", "rrp"))
-# quantity per orderID, colorCode, productGroup and rrp
-temp = aggregate(df_all$quantity, list(df_all$orderID, df_all$colorCode, df_all$productGroup, df_all$rrp), sum)
-names(temp) = c("orderID", "colorCode", "productGroup", "rrp", "quantity_per_order_color_prod_rrp")
-df_all = join(df_all, temp, by=c("orderID", "colorCode", "productGroup", "rrp"))
-# quantity per orderID, sizeCode, productGroup and rrp
-temp = aggregate(df_all$quantity, list(df_all$orderID, df_all$sizeCode, df_all$productGroup, df_all$rrp), sum)
-names(temp) = c("orderID", "sizeCode", "productGroup", "rrp", "quantity_per_order_size_prod_rrp")
-df_all = join(df_all, temp, by=c("orderID", "sizeCode", "productGroup", "rrp"))
+#' quantity per customerID, colorCode, productGroup and rrp
+temp <- aggregate(df_all$quantity, list(df_all$customerID, df_all$colorCode, df_all$productGroup, df_all$rrp), sum)
+names(temp) <- c("customerID", "colorCode", "productGroup", "rrp", "quantity_per_customer_color_prod_rrp")
+df_all <- join(df_all, temp, by = c("customerID", "colorCode", "productGroup", "rrp"))
+#' quantity per customerID, sizeCode, productGroup and rrp
+temp <- aggregate(df_all$quantity, list(df_all$customerID, df_all$sizeCode, df_all$productGroup, df_all$rrp), sum)
+names(temp) <- c("customerID", "sizeCode", "productGroup", "rrp", "quantity_per_customer_size_prod_rrp")
+df_all <- join(df_all, temp, by = c("customerID", "sizeCode", "productGroup", "rrp"))
+#' quantity per orderID, colorCode, productGroup and rrp
+temp <- aggregate(df_all$quantity, list(df_all$orderID, df_all$colorCode, df_all$productGroup, df_all$rrp), sum)
+names(temp) <- c("orderID", "colorCode", "productGroup", "rrp", "quantity_per_order_color_prod_rrp")
+df_all <- join(df_all, temp, by = c("orderID", "colorCode", "productGroup", "rrp"))
+#' quantity per orderID, sizeCode, productGroup and rrp
+temp <- aggregate(df_all$quantity, list(df_all$orderID, df_all$sizeCode, df_all$productGroup, df_all$rrp), sum)
+names(temp) <- c("orderID", "sizeCode", "productGroup", "rrp", "quantity_per_order_size_prod_rrp")
+df_all <- join(df_all, temp, by = c("orderID", "sizeCode", "productGroup", "rrp"))
 
-df_all$quantity_ratio_per_customer_color_prod = df_all$quantity_per_customer_color_prod/df_all$quantity_per_customer_prod
-df_all$quantity_ratio_per_customer_size_prod = df_all$quantity_per_customer_size_prod/df_all$quantity_per_customer_prod
-df_all$quantity_ratio_per_order_color_prod = df_all$quantity_per_order_color_prod/df_all$quantity_per_order_prod
-df_all$quantity_ratio_per_order_size_prod = df_all$quantity_per_order_size_prod/df_all$quantity_per_order_prod
+#' quantity ratio
+df_all$quantity_ratio_per_customer_color_prod <- df_all$quantity_per_customer_color_prod / df_all$quantity_per_customer_prod
+df_all$quantity_ratio_per_customer_size_prod <- df_all$quantity_per_customer_size_prod / df_all$quantity_per_customer_prod
+df_all$quantity_ratio_per_order_color_prod <- df_all$quantity_per_order_color_prod / df_all$quantity_per_order_prod
+df_all$quantity_ratio_per_order_size_prod <- df_all$quantity_per_order_size_prod / df_all$quantity_per_order_prod
 
-df_all$quantity_ratio_per_customer_color_article = df_all$quantity_per_customer_color_article/df_all$quantity_per_customer_article
-df_all$quantity_ratio_per_customer_size_article = df_all$quantity_per_customer_size_article/df_all$quantity_per_customer_article
-df_all$quantity_ratio_per_order_color_article = df_all$quantity_per_order_color_article/df_all$quantity_per_order_article
-df_all$quantity_ratio_per_order_size_article = df_all$quantity_per_order_size_article/df_all$quantity_per_order_article
+df_all$quantity_ratio_per_customer_color_article <- df_all$quantity_per_customer_color_article / df_all$quantity_per_customer_article
+df_all$quantity_ratio_per_customer_size_article <- df_all$quantity_per_customer_size_article / df_all$quantity_per_customer_article
+df_all$quantity_ratio_per_order_color_article <- df_all$quantity_per_order_color_article / df_all$quantity_per_order_article
+df_all$quantity_ratio_per_order_size_article <- df_all$quantity_per_order_size_article / df_all$quantity_per_order_article
 
-df_all$quantity_ratio_per_customer_color_prod_rrp = df_all$quantity_per_customer_color_prod_rrp/df_all$quantity_per_customer_prod_rrp
-df_all$quantity_ratio_per_customer_size_prod_rrp = df_all$quantity_per_customer_size_prod_rrp/df_all$quantity_per_customer_prod_rrp
-df_all$quantity_ratio_per_order_color_prod_rrp = df_all$quantity_per_order_color_prod_rrp/df_all$quantity_per_order_prod_rrp
-df_all$quantity_ratio_per_order_size_prod_rrp = df_all$quantity_per_order_size_prod_rrp/df_all$quantity_per_order_prod_rrp
+df_all$quantity_ratio_per_customer_color_prod_rrp <- df_all$quantity_per_customer_color_prod_rrp / df_all$quantity_per_customer_prod_rrp
+df_all$quantity_ratio_per_customer_size_prod_rrp <- df_all$quantity_per_customer_size_prod_rrp / df_all$quantity_per_customer_prod_rrp
+df_all$quantity_ratio_per_order_color_prod_rrp <- df_all$quantity_per_order_color_prod_rrp / df_all$quantity_per_order_prod_rrp
+df_all$quantity_ratio_per_order_size_prod_rrp <- df_all$quantity_per_order_size_prod_rrp / df_all$quantity_per_order_prod_rrp
 
 
 
