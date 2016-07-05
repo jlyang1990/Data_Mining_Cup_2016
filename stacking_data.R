@@ -1,4 +1,5 @@
-importance_matrix_final = importance_matrix
+#' combine all the prediction values from 1st layer models and top important features, to make feature dataset in 2nd layer model (model stacking)
+#' written by Jilei Yang
 
 #generate stacking_new##########################
 
