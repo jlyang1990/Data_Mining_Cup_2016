@@ -406,12 +406,12 @@ df_all$min_order_discounted_ratio_per_customer <- tapply(df_all$discounted_ratio
 #' function to generate mean, max and min quantity of choice order items in a single order per customer, and max and min quantity ratio of choice order items in a single order per customer
 ChoiceItemWithinOrderPerCustomer <- function(obj) {
   #' mean, max and min quantity of choice order items in a single order per customer
-  df_all[, sprintf("mean_order_%s_item_quantity_per_customer", obj)] = df_all[, sprintf("%s_item_quantity_per_customer", obj)] / df_all$order_per_customer
-  df_all[, sprintf("max_order_%s_item_quantity_per_customer", obj)] = tapply(df_all[, sprintf("%s_item_quantity_per_order", obj)], df_all$customerID, max)[df_all$customerID]
-  df_all[, sprintf("min_order_%s_item_quantity_per_customer", obj)] = tapply(df_all[, sprintf("%s_item_quantity_per_order", obj)], df_all$customerID, min)[df_all$customerID]
+  df_all[, sprintf("mean_order_%s_item_quantity_per_customer", obj)] <- df_all[, sprintf("%s_item_quantity_per_customer", obj)] / df_all$order_per_customer
+  df_all[, sprintf("max_order_%s_item_quantity_per_customer", obj)] <- tapply(df_all[, sprintf("%s_item_quantity_per_order", obj)], df_all$customerID, max)[df_all$customerID]
+  df_all[, sprintf("min_order_%s_item_quantity_per_customer", obj)] <- tapply(df_all[, sprintf("%s_item_quantity_per_order", obj)], df_all$customerID, min)[df_all$customerID]
   #' max and min quantity ratio of choice order items in a single order per customer
-  df_all[, sprintf("max_order_%s_item_quantity_ratio_per_customer", obj)] = tapply(df_all[, sprintf("%s_item_quantity_ratio_per_order", obj)], df_all$customerID, max)[df_all$customerID]
-  df_all[, sprintf("min_order_%s_item_quantity_ratio_per_customer", obj)] = tapply(df_all[, sprintf("%s_item_quantity_ratio_per_order", obj)], df_all$customerID, min)[df_all$customerID]
+  df_all[, sprintf("max_order_%s_item_quantity_ratio_per_customer", obj)] <- tapply(df_all[, sprintf("%s_item_quantity_ratio_per_order", obj)], df_all$customerID, max)[df_all$customerID]
+  df_all[, sprintf("min_order_%s_item_quantity_ratio_per_customer", obj)] <- tapply(df_all[, sprintf("%s_item_quantity_ratio_per_order", obj)], df_all$customerID, min)[df_all$customerID]
   return(df_all)
 }
 
