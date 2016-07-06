@@ -1,63 +1,49 @@
 #' combine all the prediction values from 1st layer models and top important features, to make feature dataset in 2nd layer model (model stacking)
 #' written by Jilei Yang
 
-#generate stacking_new##########################
+#' consider two feature transformation types for new feature items in testing dataset: "new" for entire transformation, "old" for transformation when confident
+feature_type <- "new"
+# feature_type <- "old"
 
-imp_var = as.matrix(importance_matrix)[1:100, 1]
-imp_feat = df_all[, (names(df_all) %in% imp_var)]
-imp_feat = imp_feat[rep(1:nrow(df_all), times=df_all$quantity), ]
-imp_feat = as.matrix(imp_feat)
-imp_feat_new = imp_feat
+#' list of models for stacking
+model_list <- c("xgb_result_%s_base_90_70",
+                "xgb_result_%s_base_90_80",
+                "xgb_result_%s_base_90_90",
+                "xgb_result_%s_base_95_75",
+                "xgb_result_%s_base_95_80",
+                "xgb_result_%s_base_95_85",
+                "xgb_result_%s_drop_gift_95_80",
+                "xgb_result_%s_drop_low_freq_cust_95_80",
+                "xgb_result_%s_drop_feat_95_75",
+                "xgb_result_%s_drop_feat_95_80",
+                "xgb_result_%s_drop_feat_95_85",
+                "xgb_result_%s_add_likelihood_cust_95_80",
+                "xgb_result_%s_add_likelihood_cust_90_85",
+                "xgb_result_%s_add_likelihood_month_95_80",
+                "dl_result_%s",
+                "rf_result_%s",
+                "glm_result_%s"
+)
 
-y_pred_prob_feat_xgb_baseline_new_ss90_cs70 = y_pred_prob_feat
-y_pred_prob_feat_xgb_baseline_new_ss90_cs80 = y_pred_prob_feat
-y_pred_prob_feat_xgb_baseline_new_ss90_cs90 = y_pred_prob_feat
-y_pred_prob_feat_xgb_baseline_new_ss95_cs75 = y_pred_prob_feat
-y_pred_prob_feat_xgb_baseline_new_ss95_cs80 = y_pred_prob_feat
-y_pred_prob_feat_xgb_baseline_new_ss95_cs85 = y_pred_prob_feat
-y_pred_prob_feat_xgb_drop_gift_new_ss95_cs80 = y_pred_prob_feat
-y_pred_prob_feat_xgb_drop_lowfreq_cust_new_ss95_cs80 = y_pred_prob_feat
-y_pred_prob_feat_xgb_drop_feat_new_ss95_cs75 = y_pred_prob_feat
-y_pred_prob_feat_xgb_drop_feat_new_ss95_cs80 = y_pred_prob_feat
-y_pred_prob_feat_xgb_drop_feat_new_ss95_cs85 = y_pred_prob_feat
-y_pred_prob_feat_xgb_likelihood_cust_new_ss95_cs80 = y_pred_prob_feat
-y_pred_prob_feat_xgb_likelihood_cust_new_ss90_cs85 = y_pred_prob_feat
-y_pred_prob_feat_xgb_likelihood_month_new_ss95_cs80 = y_pred_prob_feat
-y_pred_prob_feat_xgb_new = c(y_pred_prob_feat_xgb_baseline_new_ss90_cs70, y_pred_prob_feat_xgb_baseline_new_ss90_cs80, y_pred_prob_feat_xgb_baseline_new_ss90_cs90, y_pred_prob_feat_xgb_baseline_new_ss95_cs75, y_pred_prob_feat_xgb_baseline_new_ss95_cs80, y_pred_prob_feat_xgb_baseline_new_ss95_cs85, y_pred_prob_feat_xgb_drop_gift_new_ss95_cs80, y_pred_prob_feat_xgb_drop_lowfreq_cust_new_ss95_cs80, y_pred_prob_feat_xgb_drop_feat_new_ss95_cs75, y_pred_prob_feat_xgb_drop_feat_new_ss95_cs80, y_pred_prob_feat_xgb_drop_feat_new_ss95_cs85, y_pred_prob_feat_xgb_likelihood_cust_new_ss95_cs80, y_pred_prob_feat_xgb_likelihood_cust_new_ss90_cs85, y_pred_prob_feat_xgb_likelihood_month_new_ss95_cs80)
+model_list <- sprintf(model_list, feature_type)
 
-y_pred_prob_feat_dl_new = y_pred_prob_feat_testnew_DL
-y_pred_prob_feat_glm_new = y_pred_prob_feat_test_GLMnet
+#' number of top important features added into feature dataset for stacking
+num_imp_feat <- 100
 
-X_all = cbind(y_pred_prob_feat_xgb_new, y_pred_prob_feat_glm_new, y_pred_prob_feat_dl_new, imp_feat_new)
+#' generate stacking_data
+load(sprintf("feature_data_%s.RData", feature_type))
+load(sprintf("%s.RData", model_list[5]))
 
-save(X_all, y, y_index, ind_drop, file="stacking_new.RData")
+imp_var <- as.matrix(importance_matrix)[1:num_imp_feat, 1]
+imp_feat <- df_all[, (names(df_all) %in% imp_var)]
+imp_feat <- as.matrix(imp_feat[rep(1:nrow(df_all), times = df_all$quantity), ])
 
+y_pred_prob_feat_all <- c()
+for(model in model_list) {
+  load(sprintf("%s.RData", model))
+  y_pred_prob_feat_all <- cbind(y_pred_prob_feat_all, y_pred_prob_feat)
+}
 
-#generate stacking_old##########################
+X_all <- cbind(y_pred_prob_feat_all, imp_feat)
 
-imp_var = as.matrix(importance_matrix)[1:100, 1]
-imp_feat = df_all[, (names(df_all) %in% imp_var)]
-imp_feat = imp_feat[rep(1:nrow(df_all), times=df_all$quantity), ]
-imp_feat = as.matrix(imp_feat)
-imp_feat_old = imp_feat
-
-y_pred_prob_feat_xgb_baseline_old_ss95_cs75 = y_pred_prob_feat
-y_pred_prob_feat_xgb_baseline_old_ss95_cs80 = y_pred_prob_feat
-y_pred_prob_feat_xgb_baseline_old_ss95_cs85 = y_pred_prob_feat
-y_pred_prob_feat_xgb_drop_gift_old_ss95_cs80 = y_pred_prob_feat
-y_pred_prob_feat_xgb_drop_lowfreq_cust_old_ss95_cs80 = y_pred_prob_feat
-y_pred_prob_feat_xgb_drop_feat_old_ss95_cs75 = y_pred_prob_feat
-y_pred_prob_feat_xgb_drop_feat_old_ss95_cs80 = y_pred_prob_feat
-y_pred_prob_feat_xgb_drop_feat_old_ss95_cs85 = y_pred_prob_feat
-y_pred_prob_feat_xgb_likelihood_cust_old_ss95_cs80 = y_pred_prob_feat
-y_pred_prob_feat_xgb_likelihood_cust_old_ss90_cs85 = y_pred_prob_feat
-y_pred_prob_feat_xgb_likelihood_month_old_ss95_cs80 = y_pred_prob_feat
-y_pred_prob_feat_xgb_old = c(y_pred_prob_feat_xgb_baseline_old_ss95_cs75, y_pred_prob_feat_xgb_baseline_old_ss95_cs80, y_pred_prob_feat_xgb_baseline_old_ss95_cs85, y_pred_prob_feat_xgb_drop_gift_old_ss95_cs80, y_pred_prob_feat_xgb_drop_lowfreq_cust_old_ss95_cs80, y_pred_prob_feat_xgb_drop_feat_old_ss95_cs75, y_pred_prob_feat_xgb_drop_feat_old_ss95_cs80, y_pred_prob_feat_xgb_drop_feat_old_ss95_cs85, y_pred_prob_feat_xgb_likelihood_cust_old_ss95_cs80, y_pred_prob_feat_xgb_likelihood_cust_old_ss90_cs85, y_pred_prob_feat_xgb_likelihood_month_old_ss95_cs80)
-
-y_pred_prob_feat_dl_old = pred
-y_pred_prob_feat_rf_old = rf_stack
-
-X_all = cbind(y_pred_prob_feat_xgb_old, y_pred_prob_feat_dl_old, y_pred_prob_feat_rf_old, imp_feat_old)
-
-save(X_all, y, y_index, ind_drop, file="stacking_old.RData")
-
+save(X_all, y, y_index, ind_drop, file = sprintf("stacking_data_%s.RData", feature_type))
