@@ -1,5 +1,5 @@
 #' build model (1st layer) using xgboost on training dataset and predict on testing dataset
-#' written by Minjie Fan
+#' written by Jilei Yang, Minjie Fan
 #' modified by Jilei Yang
 
 rm(list = ls())

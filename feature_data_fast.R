@@ -16,46 +16,51 @@ feature_type <- "new"
 #' load data
 df_train <- read.table(file = 'orders_train.txt', header = TRUE, sep = ';', stringsAsFactors = FALSE) 
 df_test <- read.table(file = 'orders_class.txt', header = TRUE, sep = ';', stringsAsFactors = FALSE)
+df_train <- data.table(df_train)
+df_test <- data.table(df_test)
 
 
 #' preprocess data ###########################################################################################################
 
 #' clean data
 #' drop records with quantity=0 and quantity<returnQuantity
-df_train <- df_train[df_train$quantity > 0 & df_train$quantity >= df_train$returnQuantity, ]
+df_train <- df_train[quantity > 0 & quantity >= returnQuantity, ]
 ind_drop <- which(df_test$quantity == 0)
 #' drop records with productGroup=NA and rrp=NA since we expect returnQuantity for these records should be zero
 #' as Qi Gao suggested, these records all have articleID i1004001 and they could be add-on items that can not be returned
-df_train <- df_train[!is.na(df_train$productGroup), ]
+df_train <- df_train[!is.na(productGroup), ]
 ind_drop <- c(ind_drop, which(is.na(df_test$productGroup)))
 df_test <- df_test[-ind_drop, ]
 
 #' convert new product group and color (suggested by Qi Gao)
 if(feature_type == "new") {
-  df_test$productGroup[df_test$productGroup %in% c(1214, 1222)] <- 15
-  df_test$productGroup[df_test$productGroup %in% c(1220, 1221)] <- 14
-  df_test$productGroup[df_test$productGroup == 1225] <- 5
-  df_test$productGroup[df_test$productGroup == 1230] <- 4
-  df_test$productGroup[df_test$productGroup == 1231] <- 3
-  df_test$productGroup[df_test$productGroup == 1234] <- 8
-  df_test$productGroup[df_test$productGroup == 1236] <- 1
-  df_test$productGroup[df_test$productGroup == 1237] <- 2
-  df_test$productGroup[df_test$productGroup %in% c(1257, 1258)] <- 17
-  df_test$productGroup[df_test$productGroup == 1289] <- 45
+  df_test[productGroup %in% c(1214, 1222)]$productGroup <- 15
+  df_test[productGroup %in% c(1220, 1221)]$productGroup <- 14
+  df_test[productGroup == 1225]$productGroup <- 5
+  df_test[productGroup == 1230]$productGroup <- 4
+  df_test[productGroup == 1231]$productGroup <- 3
+  df_test[productGroup == 1234]$productGroup <- 8
+  df_test[productGroup == 1236]$productGroup <- 1
+  df_test[productGroup == 1237]$productGroup <- 2
+  df_test[productGroup %in% c(1257, 1258)]$productGroup <- 17
+  df_test[productGroup == 1289]$productGroup <- 45
 } else {
-  df_test$productGroup[df_test$productGroup == 1231] <- 3
-  df_test$productGroup[df_test$productGroup == 1237] <- 2
-  df_test$productGroup[df_test$productGroup == 1289] <- 45
+  df_test[productGroup == 1231]$productGroup <- 3
+  df_test[productGroup == 1237]$productGroup <- 2
+  df_test[productGroup == 1289]$productGroup <- 45
 }
 
-temp <- df_test$colorCode[df_test$colorCode > 9999]
-df_test$colorCode[df_test$colorCode > 9999] <- as.integer(temp %% 1000 + temp %/% 10000 * 1000)
+temp <- df_test[colorCode > 9999]$colorCode
+df_test[colorCode > 9999]$colorCode <- as.integer(temp %% 1000 + temp %/% 10000 * 1000)
 
 #' drop response and combine training and testing dataset
 n_train <- nrow(df_train)
 y <- df_train$returnQuantity
+df_train <- df_train[, returnQuantity := NULL]
 df_train <- subset(df_train, select = -returnQuantity)
+df_train_quantity <- df_train$quantity
 df_all <- rbind(df_train, df_test)
+rm(df_train, df_test)
 
 
 #' preliminary feature engineering ###########################################################################################
@@ -729,7 +734,5 @@ for (f in str2num_feats) {
 #' delete unused features
 df_all <- subset(df_all, select = -c(orderID, price, orderDate, orderDate_ind, first_orderDate, rrp_new, temp_ac, temp_as, temp_cp, temp_sp, temp_csp, temp_pr, temp_cpr, temp_spr, temp_cspr, temp_article_1, temp_as_1, temp_sp_1, temp_pr_1, temp_spr_1, temp_article_234, temp_as_234, temp_sp_234, temp_pr_234, temp_spr_234, temp_article_34, temp_as_34, temp_sp_34, temp_pr_34, temp_spr_34, temp_article_4, temp_as_4, temp_sp_4, temp_pr_4, temp_spr_4))
 df_all <- df_all[, !(names(df_all) %in% OHE_feats)]
-
-df_train_quantity <- df_train$quantity
 
 save(df_all, y, df_train_quantity, ind_drop, file = sprintf("feature_data_%s.RData", feature_type))

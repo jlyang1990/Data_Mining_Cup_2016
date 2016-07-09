@@ -1,5 +1,5 @@
 #' build stacking model (2nd layer) using xgboost on training dataset and predict on testing dataset
-#' written by Minjie Fan
+#' written by Minjie Fan, Jilei Yang
 #' modified by Jilei Yang
 
 rm(list = ls())
