@@ -245,7 +245,11 @@ df_all[, temp_acs := apply(cbind(articleID, colorCode, sizeCode), 1, function(x)
 df_all[, temp_acsp := apply(cbind(articleID, colorCode, sizeCode, price), 1, function(x) paste(x, sep="", collapse=" "))]
 
 #' choice order item list
-choice_item_list <- c("article", "ac", "as", "cp", "sp", "csp", "pr", "cpr", "spr", "cspr", "article_1", "as_1", "sp_1", "pr_1", "spr_1", "article_234", "as_234", "sp_234", "pr_234", "spr_234", "article_34", "as_34", "sp_34", "pr_34", "spr_34", "article_4", "as_4", "sp_4", "pr_4", "spr_4")
+choice_item_list <- c("article", "ac", "as", "cp", "sp", "csp", "pr", "cpr", "spr", "cspr", 
+                      "article_1", "as_1", "sp_1", "pr_1", "spr_1", 
+                      "article_234", "as_234", "sp_234", "pr_234", "spr_234", 
+                      "article_34", "as_34", "sp_34", "pr_34", "spr_34", 
+                      "article_4", "as_4", "sp_4", "pr_4", "spr_4")
 
 #' implement ChoiceItemWithinOrder to choice order item list
 for(choice_item in choice_item_list) {
@@ -422,7 +426,8 @@ df_all[, min_discounted_ratio_per_article := min(discounted_ratio_per_quantity),
 #' orderDate feature ##########################################################################################################
 
 #' indicator of closeness to holidays
-holidays <- as.Date(c('2014-01-01', '2014-04-21', '2014-05-01', '2014-05-29', '2014-06-09', '2014-10-03', '2014-12-25', '2014-12-26', '2015-01-01', '2015-04-06', '2015-05-01', '2015-05-14', '2015-05-25', '2015-10-03', '2015-12-25', '2015-12-26'))
+holidays <- as.Date(c('2014-01-01', '2014-04-21', '2014-05-01', '2014-05-29', '2014-06-09', '2014-10-03', '2014-12-25', '2014-12-26', 
+                      '2015-01-01', '2015-04-06', '2015-05-01', '2015-05-14', '2015-05-25', '2015-10-03', '2015-12-25', '2015-12-26'))
 df_all[, near_holi := as.integer(any(abs(as.Date(orderDate) - holidays) < 7)), by = orderDate]
 
 #' first order date per customer
