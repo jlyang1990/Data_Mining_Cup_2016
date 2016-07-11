@@ -224,7 +224,7 @@ df_all$temp_as_1 <- apply(cbind(df_all$articleID, df_all$sizeCode, df_all$colorC
 #' sp_1 item: items with the same productGroup, sizeCode and colorCode_1
 df_all$temp_sp_1 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$colorCode_1), 1, function(x) paste(x, sep = "", collapse = " "))
 #' pr_1 item: items with the same rrp and productGroup and colorCode_1
-df_all$temp_pr_1 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_1), 1, function(x) paste(x, sep = "", collapse = " "))
+df_all$temp_pr_1 <- apply(cbind(df_all$productGroup, df_all$rrp_new, df_all$colorCode_1), 1, function(x) paste(x, sep = "", collapse = " "))
 #' spr_1 item: items with the same rrp, productGroup, sizeCode and colorCode_1
 df_all$temp_spr_1 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_1), 1, function(x) paste(x, sep = "", collapse = " "))
 #' article_234 item: items with the same articleID and colorCode_234
@@ -234,7 +234,7 @@ df_all$temp_as_234 <- apply(cbind(df_all$articleID, df_all$sizeCode, df_all$colo
 #' sp_234 item: items with the same productGroup, sizeCode and colorCode_234
 df_all$temp_sp_234 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$colorCode_234), 1, function(x) paste(x, sep = "", collapse = " "))
 #' pr_234 item: items with the same rrp, productGroup and colorCode_234
-df_all$temp_pr_234 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_234), 1, function(x) paste(x, sep = "", collapse = " "))
+df_all$temp_pr_234 <- apply(cbind(df_all$productGroup, df_all$rrp_new, df_all$colorCode_234), 1, function(x) paste(x, sep = "", collapse = " "))
 #' spr_234 item: items with the same rrp, productGroup, sizeCode and colorCode_234
 df_all$temp_spr_234 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_234), 1, function(x) paste(x, sep = "", collapse = " "))
 #' article_34 item: items with the same articleID and colorCode_34
@@ -244,7 +244,7 @@ df_all$temp_as_34 <- apply(cbind(df_all$articleID, df_all$sizeCode, df_all$color
 #' sp_34 item: items with the same productGroup, sizeCode and colorCode_34
 df_all$temp_sp_34 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$colorCode_34), 1, function(x) paste(x, sep = "", collapse = " "))
 #' pr_34 item: items with the same rrp, productGroup and colorCode_34
-df_all$temp_pr_34 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_34), 1, function(x) paste(x, sep = "", collapse = " "))
+df_all$temp_pr_34 <- apply(cbind(df_all$productGroup, df_all$rrp_new, df_all$colorCode_34), 1, function(x) paste(x, sep = "", collapse = " "))
 #' spr_34 item: items with the same rrp, productGroup, sizeCode and colorCode_34
 df_all$temp_spr_34 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_34), 1, function(x) paste(x, sep = "", collapse = " "))
 #' article_4 item: items with the same articleID and colorCode_4
@@ -254,7 +254,7 @@ df_all$temp_as_4 <- apply(cbind(df_all$articleID, df_all$sizeCode, df_all$colorC
 #' sp_4 item: items with the same productGroup, sizeCode and colorCode_4
 df_all$temp_sp_4 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$colorCode_4), 1, function(x) paste(x, sep = "", collapse = " "))
 #' pr_4 item: items with the same rrp, productGroup and colorCode_4
-df_all$temp_pr_4 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_4), 1, function(x) paste(x, sep = "", collapse = " "))
+df_all$temp_pr_4 <- apply(cbind(df_all$productGroup, df_all$rrp_new, df_all$colorCode_4), 1, function(x) paste(x, sep = "", collapse = " "))
 #' spr_4 item: items with the same rrp, productGroup, sizeCode and colorCode_4
 df_all$temp_spr_4 <- apply(cbind(as.character(df_all$sizeCode), df_all$productGroup, df_all$rrp_new, df_all$colorCode_4), 1, function(x) paste(x, sep = "", collapse = " "))
 
@@ -727,7 +727,7 @@ for (f in str2num_feats) {
 }
 
 #' delete unused features
-df_all <- subset(df_all, select = -c(orderID, price, orderDate, orderDate_ind, first_orderDate, rrp_new, temp_ac, temp_as, temp_cp, temp_sp, temp_csp, temp_pr, temp_cpr, temp_spr, temp_cspr, temp_article_1, temp_as_1, temp_sp_1, temp_pr_1, temp_spr_1, temp_article_234, temp_as_234, temp_sp_234, temp_pr_234, temp_spr_234, temp_article_34, temp_as_34, temp_sp_34, temp_pr_34, temp_spr_34, temp_article_4, temp_as_4, temp_sp_4, temp_pr_4, temp_spr_4))
+df_all <- subset(df_all, select = -c(orderID, price, voucherID, orderDate, orderDate_ind, first_orderDate, rrp_new, temp_ac, temp_as, temp_cp, temp_sp, temp_csp, temp_pr, temp_cpr, temp_spr, temp_cspr, temp_article_1, temp_as_1, temp_sp_1, temp_pr_1, temp_spr_1, temp_article_234, temp_as_234, temp_sp_234, temp_pr_234, temp_spr_234, temp_article_34, temp_as_34, temp_sp_34, temp_pr_34, temp_spr_34, temp_article_4, temp_as_4, temp_sp_4, temp_pr_4, temp_spr_4))
 df_all <- df_all[, !(names(df_all) %in% OHE_feats)]
 
 df_train_quantity <- df_train$quantity
