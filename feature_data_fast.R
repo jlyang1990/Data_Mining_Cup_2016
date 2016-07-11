@@ -159,7 +159,8 @@ df_all[, mean_rrp_per_order := mean(rrp), by = orderID]
 df_all[, max_rrp_per_order := max(rrp), by = orderID]
 df_all[, min_rrp_per_order := min(rrp), by = orderID]
 
-#' function to generate item_quantity_index, item_quantity_per_order and item_quantity_ratio_per_order for choice order items (items sharing some similarities in articleID, colorCode, sizeCode, productGroup and rrp)
+#' function to generate item_quantity_index, item_quantity_per_order and item_quantity_ratio_per_order for choice order item
+#' choice order item: items sharing some similarities in articleID, colorCode, sizeCode, productGroup and rrp
 ChoiceItemWithinOrder <- function(obj) {
   df_all[, sprintf("%s_item_quantity_index", obj) := .N, by = .(eval(parse(text = sprintf("temp_%s", obj))), orderID)]
   df_all[, sprintf("%s_item_quantity_per_order", obj) := sum(quantity * (eval(parse(text = sprintf("%s_item_quantity_index", obj)) > 1))), by = orderID]
