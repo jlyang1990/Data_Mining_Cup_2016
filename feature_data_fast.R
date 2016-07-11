@@ -5,8 +5,6 @@
 rm(list = ls())
 library(caret)
 library(stringr)
-library(plyr)
-library(sqldf)
 library(data.table)
 
 #' consider two feature transformation types for new feature items in testing dataset: "new" for entire transformation, "old" for transformation when confident
@@ -14,10 +12,8 @@ feature_type <- "new"
 # feature_type <- "old"
 
 #' load data
-df_train <- read.table(file = 'orders_train.txt', header = TRUE, sep = ';', stringsAsFactors = FALSE) 
-df_test <- read.table(file = 'orders_class.txt', header = TRUE, sep = ';', stringsAsFactors = FALSE)
-df_train <- data.table(df_train)
-df_test <- data.table(df_test)
+df_train <- fread('orders_train.txt')
+df_test <- fread('orders_class.txt')
 
 
 #' preprocess data ############################################################################################################
@@ -589,6 +585,12 @@ df_all[, articleID := as.integer(substring(articleID, 3))]
 df_all[, customerID := as.integer(substring(customerID, 3))]
 
 #' delete unused features
-df_all[, c("orderID", "price", "voucherID", "orderDate", "orderDate_int", "first_orderDate", "rrp_new", "temp_article", "temp_ac", "temp_as", "temp_cp", "temp_sp", "temp_csp", "temp_pr", "temp_cpr", "temp_spr", "temp_cspr", "temp_article_1", "temp_as_1", "temp_sp_1", "temp_pr_1", "temp_spr_1", "temp_article_234", "temp_as_234", "temp_sp_234", "temp_pr_234", "temp_spr_234", "temp_article_34", "temp_as_34", "temp_sp_34", "temp_pr_34", "temp_spr_34", "temp_article_4", "temp_as_4", "temp_sp_4", "temp_pr_4", "temp_spr_4", "temp_acs", "temp_acsp", OHE_feats) := NULL]
+df_all[, c("orderID", "price", "voucherID", "orderDate", "orderDate_int", "first_orderDate", "rrp_new",
+           "temp_article", "temp_ac", "temp_as", "temp_cp", "temp_sp", "temp_csp", "temp_pr", "temp_cpr", "temp_spr", "temp_cspr",
+           "temp_article_1", "temp_as_1", "temp_sp_1", "temp_pr_1", "temp_spr_1",
+           "temp_article_234", "temp_as_234", "temp_sp_234", "temp_pr_234", "temp_spr_234",
+           "temp_article_34", "temp_as_34", "temp_sp_34", "temp_pr_34", "temp_spr_34",
+           "temp_article_4", "temp_as_4", "temp_sp_4", "temp_pr_4", "temp_spr_4",
+           "temp_acs", "temp_acsp", OHE_feats) := NULL]
 
 save(df_all, y, df_train_quantity, ind_drop, file = sprintf("feature_data_%s.RData", feature_type))
