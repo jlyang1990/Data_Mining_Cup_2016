@@ -1,1 +1,2 @@
-# Data_Mining_Cup_2016
+# Winning solution to 2016 [*Data Mining Cup*](http://www.data-mining-cup.de/en/dmc-competition/)
+### Ranked [1/120](http://www.data-mining-cup.de/en/wettbewerb/preistraeger.html) as Team Uni_UC_Davis_2
