@@ -33,7 +33,8 @@ xgb_colsample <- 0.8
 load(sprintf("feature_data_%s.RData", feature_type))
 
 if(drop_feat == TRUE) {
-  df_all <- subset(df_all, select = -c(price_per_cust_date, price_per_cust_3date, price_per_cust_5date, price_per_cust_7date, price_per_cust_11date, price_per_cust_15date))
+  df_all[, c("price_per_cust_date", "price_per_cust_3date", "price_per_cust_5date",
+             "price_per_cust_7date", "price_per_cust_11date", "price_per_cust_15date") := NULL]
 }
 
 #' expand feature matrix "df_all" and response "y" with respect to "quantity"
