@@ -29,7 +29,7 @@ Feature engineering is always the most important and crutial part in data scienc
 
 - New productGroup transformation. The new productGroups that appear in the test data only are manually imputed by matching them with the existing productGroups. We cannot validate this extrapolation using the available data. To be conservative, the final prediction is a weighted average of the predictions where the imputation is conducted in two different ways.
 
-The script for feature engineering is *feature_data.R*. The package **data.table** is used to make the syntax concise and the computation fast.
+The script for feature engineering is *feature_data.R*. The package **data.table** is used to make the syntax concise and computation fast.
 
 ## Modeling strategy
 
