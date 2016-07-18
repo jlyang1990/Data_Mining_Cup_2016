@@ -39,4 +39,4 @@ There are four other teammates, without whom the competition is impossible to be
 
 Thanks Minjie Fan and Hao Ji for writing a detailed report to summarize our work in DMC 2016. Most of the descriptions in README are from this report. The report can be reached in [Minjie Fan's Github](https://github.com/minjay/DMC2016).
 
-At last, I would like to share one saying from a sucessful Kaggler with you: *'Features make difference and ensemble makes you win.'* This is exactly what we have learned from 2016 Data Mining Cup.
+**At last, I would like to share one saying from a sucessful Kaggler with you: *''Features make difference and ensemble makes you win.''* This is exactly what we have learned from 2016 Data Mining Cup.**
