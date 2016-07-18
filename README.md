@@ -40,6 +40,9 @@ The script for feature engineering is *feature_data.R*. The package **data.table
 2. Treat the predicted probabilities of return as new features. Combine them with the top 100 important features, and feed them into xgboost and deep learning to generate second layer predictions.
 3. Bagging the second layer predictions to form the final prediction. In practice, we only used the boosting predictions due to their very high correlation with the deep learning predictions.
 
+
+![alt text](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/images/flow_chart.pdf)
+
 - It is very important to have a robust performance evaluation criterion for feature selection and model comparison. In time series predictor evaluation, a blocked form of cross-validation (Bergmeir and Ben ́ıtez, 2012) is more suitable than the traditional cross-validation since the former respects the temporal dependence. However, it suffers from the problem of predicting the past based on the future. Another common practice is to reserve a part from the end of each time series for testing, and to use the rest of the series for training. This strategy avoids predicting the past, but it does not make full use of the data, and thus is less stable than cross-validation and prone to be over-fitting to the test data. To validate the modeling strategy, we applied both methods. Specifically, we divided the training data into 7 cross- validation folds with about 3 months in each fold, and treated the last fold (called holdout set) as a pseudo test set.
 
 ## Acknowledgement
