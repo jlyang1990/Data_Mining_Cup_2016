@@ -70,12 +70,12 @@ for (i in 1:n_fold) {
   y_val <- y[fold_id == i]
   y_index_val <- y_index_cv[fold_id == i]
   
-  bst <- train(X_train, as.factor(y_train), method = "parRF", trControl = myControl, tuneGrid = param)
+  model_rf <- train(X_train, as.factor(y_train), method = "parRF", trControl = myControl, tuneGrid = param)
   
-  y_pred_prob_feat[1:n_train][fold_id == i] <- predict(bst, X_val, type = "prob")$'1'
+  y_pred_prob_feat[1:n_train][fold_id == i] <- predict(model_rf, X_val, type = "prob")$'1'
   scores[i] <- mean(abs(as.numeric(round(tapply(y_pred_prob_feat[1:n_train][fold_id == i], y_index_val, sum))) - tapply(y_val, y_index_val, sum)))
   cat(paste('\n', 'mae =', scores[i], '\n'))
-  y_pred <- predict(bst, X_test, type = "prob")$'1'
+  y_pred <- predict(model_rf, X_test, type = "prob")$'1'
   y_pred_sum <- y_pred_sum + y_pred
 }
 
@@ -85,7 +85,7 @@ y_pred_prob_feat[(n_train + 1):n_tot] <- y_pred_sum / n_fold
 y_pred_prob <- tapply(y_pred_sum / n_fold, y_index_test, sum)
 y_pred <- round(y_pred_prob)
 
-importance_matrix <- varImp(bst)
+importance_matrix <- varImp(model_rf)
 
 cat(paste("mean_score =", mean(scores), "sd_score =", sd(scores), '\n'))
 

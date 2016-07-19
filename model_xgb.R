@@ -148,15 +148,15 @@ for (i in 1:n_fold) {
   dtrain <- xgb.DMatrix(X_train, label = y_train)
   dval <- xgb.DMatrix(X_val, label = y_val)
   watchlist <- list(eval = dval, train = dtrain)
-  bst <- xgb.train(param, dtrain, nthread = 40, nrounds = 1e4, watchlist, early.stop.round = 100, maximize = FALSE)
+  model_xgb <- xgb.train(param, dtrain, nthread = 40, nrounds = 1e4, watchlist, early.stop.round = 100, maximize = FALSE)
   
-  y_pred_prob_feat[1:n_train][fold_id == i] <- predict(bst, X_val, ntreelimit = bst$bestInd)
+  y_pred_prob_feat[1:n_train][fold_id == i] <- predict(model_xgb, X_val, ntreelimit = model_xgb$bestInd)
   if(drop_gift == TRUE) {
     y_pred_prob_feat[1:n_train][fold_id == i & price_per_quantity_cv == 0] <- 0
   }
   scores[i] <- mean(abs(as.numeric(round(tapply(y_pred_prob_feat[1:n_train][fold_id == i], y_index_val, sum))) - tapply(y_val, y_index_val, sum)))
   cat(paste('\n', 'mae =', scores[i], '\n'))
-  y_pred <- predict(bst, X_test, ntreelimit = bst$bestInd)
+  y_pred <- predict(model_xgb, X_test, ntreelimit = model_xgb$bestInd)
   y_pred_sum <- y_pred_sum + y_pred
 }
 
@@ -169,7 +169,7 @@ y_pred <- round(y_pred_prob)
 
 library(Ckmeans.1d.dp)
 #' importance matrix of xgboost model corresponding to the last cv fold
-importance_matrix <- xgb.importance(colnames(X), model = bst)
+importance_matrix <- xgb.importance(colnames(X), model = model_xgb)
 
 cat(paste("mean_score =", mean(scores), "sd_score =", sd(scores), '\n'))
 
