@@ -35,10 +35,11 @@ The script for feature engineering is [*feature_data.R*](https://github.com/jlya
 
 - We reformulated the prediction task into a binary classification problem by expanding the data with respect to the predictor quantity, so that the new response on each line is either 0 or 1. The computational cost is much less compared with the multi-class classification problem.
 
-- We applied stacked generalization: a multi-layer modeling approach to combine the predictions of several base learners to improve the predictive power through leveraging the strength of each base model and to avoid overfitting. The outline is as follows:
+- We applied stacked generalization: a multi-layer modeling approach to combine the predictions of several base learners to improve the predictive power through leveraging the strength of each base model and to avoid overfitting. The outline (see figure below) is as follows:
   1. Train base learners with the help of cross-validation, and predict for both training and test data. We used regularized logistic regression (glmnet), random forest (parRF), deep learning (h2o.deeplearning) and gradient boosting (xgboost) models, where the R packages we used are indicated in parenthesis.
   2. Treat the predicted probabilities of return as new features. Combine them with the top 100 important features, and feed them into xgboost to generate second layer predictions.
   3. Bagging the second layer predictions to form the final prediction.
+![alt text](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/flow_chart.png)
 
 - In time series predictor evaluation, a blocked form of cross-validation is more suitable than the traditional one since the former respects the temporal dependence. However, it suffers from the problem of predicting the past based on the future. Another common practice is to reserve a part from the end of time series for testing, and to use the rest for training. This strategy avoids predicting the past, but it does not make full use of the data. To validate the modeling strategy, we combined these two methods. Specifically, we divided the training data into 7 cross-validation folds with 3 months in each fold, and treated the last fold (called holdout set) as a pseudo test set. For the final prediction, we trained the final model on all these 7 cross-validation folds and predicted on the test set.
 
