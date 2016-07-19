@@ -12,8 +12,7 @@ The dataset for DMC 2016 can be downloaded [here](http://www.data-mining-cup.de/
 
 Feature engineering is always the most important and crutial part in data science competition. We approached the feature engineering problem from several different perspectives:
 
-- Aggregation.
-  We grouped data (e.g., price, quantity) by certain variables, such as `orderID`, `customerID`, `articleID` and `orderDate`. To each group of the data, we applied aggregate functions including mean, sum, number of elements, number of unique elements, etc. We then expanded the summarized data by inserting them into each row. Here are some examples: total quantity per order, total number of orders per customer and mean recommended retail price per article.
+- Aggregation. We grouped data (e.g., price, quantity) by certain variables, such as `orderID`, `customerID`, `articleID` and `orderDate`. To each group of the data, we applied aggregate functions including mean, sum, number of elements, number of unique elements, etc. We then expanded the summarized data by inserting them into each row. Here are some examples: total quantity per order, total number of orders per customer and mean recommended retail price per article.
 
 - Decoding.
   - `ColorCode` is represented by four-digit numbers, where each digit has its own meaning, such as color, shade and pattern. Thus, it is more reasonable to use each digit of colorCode as features. 
@@ -26,11 +25,9 @@ Feature engineering is always the most important and crutial part in data scienc
   - We created features that reflect customer preferences since they tend to pick their preferred items among similar items. For example, the percentage of each possible color of a specific article bought by a customer. 
   - We extended the idea of similar items to the across-order cases. If a customer has bought similar items many times, the customer is very familiar with this type of items and has a higher probability of keeping it.
 
-- Likelihood of returning.
-  We used the out-of-sample returning rate to construct the likelihood features for each customer and each month. It turns out that the change of the prediction is significant when likelihood features are added, and this would greatly improve the performance of model stacking described later.
+- Likelihood of returning. We used the out-of-sample returning rate to construct the likelihood features for each customer and each month. It turns out that the change of the prediction is significant when likelihood features are added, and this would greatly improve the performance of model stacking described later.
 
-- New product group transformation. 
-  The new product groups that appear in the test data only are manually imputed by matching them with the existing product groups. To be conservative, the final prediction is a weighted average of the predictions where the imputation is conducted in two different ways.
+- New product group transformation. The new product groups that appear in the test data only are manually imputed by matching them with the existing product groups. To be conservative, the final prediction is a weighted average of the predictions where the imputation is conducted in two different ways.
 
 The script for feature engineering is [*feature_data.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/feature_data.R). The package **data.table** is used to make the syntax concise and computation fast.
 
