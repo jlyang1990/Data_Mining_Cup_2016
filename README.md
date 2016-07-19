@@ -1,4 +1,4 @@
-# Winning solution to [*2016 Data Mining Cup*](http://www.data-mining-cup.de/en/review/goto/article/dmc-2016.html)
+# Winning Solution to [*2016 Data Mining Cup*](http://www.data-mining-cup.de/en/review/goto/article/dmc-2016.html)
 ### Ranked [1/120](https://www.ucdavis.edu/news/uc-davis-statistics-students-win-international-data-competition) as Team Uni_UC_Davis_2
 
 
@@ -35,17 +35,19 @@ The script for feature engineering is *feature_data.R*. The package **data.table
 
 - We reformulated the prediction task into a binary classification problem by expanding the data with respect to the predictor quantity, so that the new response on each line is either 0 or 1. The computational cost is much less compared with the multi-class classification problem.
 
-- With the derived features, we applied stacked generalization (Wolpert, 1992): a multi-layer modeling approach to combine the predictions of several base learners to improve the predictive power through leveraging the strength of each base model and to avoid overfitting. The outline (see Figure 4) is as follows:
-1. Train base learners with the help of cross-validation, and predict for both training and test data. We used regularized logistic regression (glmnet) (Friedman et al., 2010), random forest (parRF) (Breiman, 2001), deep learning (h2o) (Arora et al., 2015) and gradient boosting (xgboost) (Chen and He, 2015) models, where the R packages we used are indicated in parenthesis.
-2. Treat the predicted probabilities of return as new features. Combine them with the top 100 important features, and feed them into xgboost and deep learning to generate second layer predictions.
-3. Bagging the second layer predictions to form the final prediction. In practice, we only used the boosting predictions due to their very high correlation with the deep learning predictions.
+- We applied stacked generalization: a multi-layer modeling approach to combine the predictions of several base learners to improve the predictive power through leveraging the strength of each base model and to avoid overfitting. The outline is as follows:
+  1. Train base learners with the help of cross-validation, and predict for both training and test data. We used regularized logistic regression (glmnet), random forest (parRF), deep learning (h2o.deeplearning) and gradient boosting (xgboost) models, where the R packages we used are indicated in parenthesis.
+  2. Treat the predicted probabilities of return as new features. Combine them with the top 100 important features, and feed them into xgboost to generate second layer predictions.
+  3. Bagging the second layer predictions to form the final prediction.
 
 - In time series predictor evaluation, a blocked form of cross-validation is more suitable than the traditional one since the former respects the temporal dependence. However, it suffers from the problem of predicting the past based on the future. Another common practice is to reserve a part from the end of time series for testing, and to use the rest for training. This strategy avoids predicting the past, but it does not make full use of the data. To validate the modeling strategy, we combined these two methods. Specifically, we divided the training data into 7 cross-validation folds with 3 months in each fold, and treated the last fold (called holdout set) as a pseudo test set. For the final model, we trained it on all these 7 cross-validation folds and predicted on the test set.
 
 ## Acknowledgement
 
-There are four other teammates, without whom the competition is impossible to be finished: Jilei Yang, Qi Gao, Nana Wang and Chunzhe Zhang. We would like to express our special thanks to Prof. Hao Chen, who provided us very insightful advice and practical guidance. We are also thankful for the support we get from the STA260 class and Prof. Wang, and also for Prudsys AG that held and sponsored this interesting competition.
+There are five other teammates, without whom the competition is impossible to be finished: Minjie Fan, Hao Ji, Qi Gao, Nana Wang and Chunzhe Zhang. 
 
-Thanks Minjie Fan and Hao Ji for writing a detailed report to summarize our work in DMC 2016. Most of the descriptions in README are from this report. The report can be reached in [Minjie Fan's Github](https://github.com/minjay/DMC2016).
+We would like to express our special thanks to Prof. Hao Chen, who provided us with very insightful advice and practical guidance. We are also thankful for the support we get from the Department of Statistics at UC Davis, and also for Prudsys AG that held and sponsored this interesting competition.
+
+I would personally thank Minjie Fan and Hao Ji for writing a detailed report to summarize our work in DMC 2016. Most of the descriptions in README are from this report. The report can be reached in [Minjie Fan's Github](https://github.com/minjay/DMC2016).
 
 **At last, I would like to share one saying from a sucessful Kaggler with you: *''Features make difference and ensemble makes you win.''* This is exactly what we have learned from 2016 Data Mining Cup.**
