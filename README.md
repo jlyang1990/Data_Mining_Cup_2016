@@ -10,26 +10,34 @@ The dataset for DMC 2016 can be downloaded [here](http://www.data-mining-cup.de/
 
 ## Feature engineering
 
-Feature engineering is always the most important and crutial part in data science competition. We approach the feature engineering problem from several different perspectives:
+Feature engineering is always the most important and crutial part in data science competition. We approached the feature engineering problem from several different perspectives:
 
-- Aggregation. We group data (e.g., price, quantity) by certain variables, such as orderID, customerID, articleID and orderDate. To each group of the data, we apply aggregate functions including min, max, mean, sum, number of elements, number of unique elements, etc. We then expand the summarized data by inserting them into each row. Here are some examples: total quantity per order, total number of orders per customer and mean recommended retail price per article.
+- Aggregation.
+
+  We grouped data (e.g., price, quantity) by certain variables, such as `orderID`, `customerID`, `articleID` and `orderDate`. To each group of the data, we applied aggregate functions including mean, sum, number of elements, number of unique elements, etc. We then expanded the summarized data by inserting them into each row. Here are some examples: total quantity per order, total number of orders per customer and mean recommended retail price per article.
 
 - Decoding.
-  - ColorCode is represented by four-digit numbers, where each digit has its own meaning, such as color, shade and pattern. Thus, it is more reasonable to use each digit of colorCode as features. 
-  - SizeCode is represented in different units for different productGroup and thus be converted into a uniform unit.
-  - Rrp (recommended retail price) reflects the price level of the items, such as cheap, regular and luxury. 
-  - PaymentMethod can be manually classified into two groups: invoice and right-away.
+
+  - `ColorCode` is represented by four-digit numbers, where each digit has its own meaning, such as color, shade and pattern. Thus, it is more reasonable to use each digit of colorCode as features. 
+  - `SizeCode` is represented in different units for different product groups and thus is converted into a uniform unit.
+  - `rrp` (recommended retail price) reflects the price level of the items, such as cheap, regular and luxury. 
+  - `PaymentMethod` can be manually classified into two groups: invoice and right-away.
 
 - Customer behavior.
-  - We propose some criteria to measure similarity between items in a single order. For example, items with the same articleID and colorCode, with the same productGroup and rrp, etc. For each item in a single order, we count the total quantity of items that are similar to it. Intuitively, the larger the value is, the higher probability of returning this item is.
-  - We create features that reflect customer preferences since they tend to pick their preferred items among similar items. For example, the percentage of each possible color of a specific article bought by a customer. 
-  - We extend the idea of similar items to the across-order cases. If a customer has bought similar items many times, the customer is very familiar with this type of items and has a higher probability of keeping it. We create relevant features based on these conjectures.
 
-- Likelihood of returning. We use the out-of-sample returning rate to construct the likelihood features for each customer and each month. It turns out that the change of the prediction is significant when likelihood features are added, and this would greatly improve the performance of model stacking described later.
+  - We proposed some criteria to measure similarity between items in a single order. For example, items with the same `articleID` and `colorCode`, with the same `productGroup` and `rrp`, etc. For each item in a single order, we counted the total quantity of items that are similar to it. Intuitively, the larger the value is, the higher probability of returning this item is.
+  - We created features that reflect customer preferences since they tend to pick their preferred items among similar items. For example, the percentage of each possible color of a specific article bought by a customer. 
+  - We extended the idea of similar items to the across-order cases. If a customer has bought similar items many times, the customer is very familiar with this type of items and has a higher probability of keeping it.
 
-- New productGroup transformation. The new productGroups that appear in the test data only are manually imputed by matching them with the existing productGroups. We cannot validate this extrapolation using the available data. To be conservative, the final prediction is a weighted average of the predictions where the imputation is conducted in two different ways.
+- Likelihood of returning.
 
-The script for feature engineering is *feature_data.R*. The package **data.table** is used to make the syntax concise and computation fast.
+  We used the out-of-sample returning rate to construct the likelihood features for each customer and each month. It turns out that the change of the prediction is significant when likelihood features are added, and this would greatly improve the performance of model stacking described later.
+
+- New product group transformation. 
+
+  The new product groups that appear in the test data only are manually imputed by matching them with the existing product groups. To be conservative, the final prediction is a weighted average of the predictions where the imputation is conducted in two different ways.
+
+The script for feature engineering is [*feature_data.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/feature_data.R). The package **data.table** is used to make the syntax concise and computation fast.
 
 ## Modeling strategy
 
@@ -40,13 +48,13 @@ The script for feature engineering is *feature_data.R*. The package **data.table
   2. Treat the predicted probabilities of return as new features. Combine them with the top 100 important features, and feed them into xgboost to generate second layer predictions.
   3. Bagging the second layer predictions to form the final prediction.
 
-- In time series predictor evaluation, a blocked form of cross-validation is more suitable than the traditional one since the former respects the temporal dependence. However, it suffers from the problem of predicting the past based on the future. Another common practice is to reserve a part from the end of time series for testing, and to use the rest for training. This strategy avoids predicting the past, but it does not make full use of the data. To validate the modeling strategy, we combined these two methods. Specifically, we divided the training data into 7 cross-validation folds with 3 months in each fold, and treated the last fold (called holdout set) as a pseudo test set. For the final model, we trained it on all these 7 cross-validation folds and predicted on the test set.
+- In time series predictor evaluation, a blocked form of cross-validation is more suitable than the traditional one since the former respects the temporal dependence. However, it suffers from the problem of predicting the past based on the future. Another common practice is to reserve a part from the end of time series for testing, and to use the rest for training. This strategy avoids predicting the past, but it does not make full use of the data. To validate the modeling strategy, we combined these two methods. Specifically, we divided the training data into 7 cross-validation folds with 3 months in each fold, and treated the last fold (called holdout set) as a pseudo test set. For the final prediction, we trained the final model on all these 7 cross-validation folds and predicted on the test set.
 
-The scripts for base learner training (first layer prediction) are *model_xgb.R*, *model_dl.R*, *model_glm.R* and *model_rf.R*.
+The scripts for base learner training (first layer prediction) are [*model_xgb.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/model_xgb.R), [*model_dl.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/model_dl.R), [*model_glm.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/model_glm.R) and [*model_rf.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/model_rf.R).
 
-The scripts for model stacking (second layer prediction) are *stacking_data.R* and *stacking_xgb.R*.
+The scripts for model stacking (second layer prediction) are [*stacking_data.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/stacking_data.R) and [*stacking_xgb.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/stacking_xgb.R).
 
-The script for final prediction generation (third layer prediction) is *final_result.R*.
+The script for final prediction generation (third layer prediction) is [*final_result.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/final_result.R).
 
 ## Acknowledgement
 
