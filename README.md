@@ -42,9 +42,15 @@ The script for feature engineering is *feature_data.R*. The package **data.table
 
 - In time series predictor evaluation, a blocked form of cross-validation is more suitable than the traditional one since the former respects the temporal dependence. However, it suffers from the problem of predicting the past based on the future. Another common practice is to reserve a part from the end of time series for testing, and to use the rest for training. This strategy avoids predicting the past, but it does not make full use of the data. To validate the modeling strategy, we combined these two methods. Specifically, we divided the training data into 7 cross-validation folds with 3 months in each fold, and treated the last fold (called holdout set) as a pseudo test set. For the final model, we trained it on all these 7 cross-validation folds and predicted on the test set.
 
+The scripts for base learner training (first layer prediction) are *model_xgb.R*, *model_dl.R*, *model_glm.R* and *model_rf.R*.
+
+The scripts for model stacking (second layer prediction) are *stacking_data.R* and *stacking_xgb.R*.
+
+The script for final prediction generation (third layer prediction) is *final_result.R*.
+
 ## Acknowledgement
 
-There are five other teammates, without whom the competition is impossible to be finished: Minjie Fan, Hao Ji, Qi Gao, Nana Wang and Chunzhe Zhang. 
+There are five other teammates, without whom the competition is impossible to be finished: Minjie Fan, Hao Ji, Qi Gao, Nana Wang and Chunzhe Zhang.
 
 We would like to express our special thanks to Prof. Hao Chen, who provided us with very insightful advice and practical guidance. We are also thankful for the support we get from the Department of Statistics at UC Davis, and also for Prudsys AG that held and sponsored this interesting competition.
 
