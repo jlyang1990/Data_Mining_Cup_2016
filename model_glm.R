@@ -1,92 +1,80 @@
-# second model 
-# Data Mining Cup 2016
-# written by Minjie Fan, 2016
-# modified by Jilei Yang, 2016
+#' build model (1st layer) using logistic regression on training dataset and predict on testing dataset
+#' captured linear relationships between features (especially dummy variables)
+#' trained limited times since this model is of relatively low predictive power
+#' written by Hao Ji
+#' modified by Jilei Yang
 
-rm(list=ls())
-library(stringr)
-library(plyr)
+rm(list = ls())
 
+#' consider two feature transformation types for new feature items in testing dataset: "new" for entire transformation, "old" for transformation when confident
+feature_type <- "new"
 
-### Minjie, please load your data frame
-# including df_all, y, y_index with the same names
-# otherwise you can run the 260 feature to the X_all=as.matrix(df_all)
-load(file = "baseFeature_oldSC_noLik.RData")
+#' load feature matrix and response
+load(sprintf("feature_data_%s.RData", feature_type))
 
-n_train = length(y)
-# need to make sure that all elements in df_all are numeric (double or integer)
-X_all = as.matrix(df_all)
-X = X_all[1:n_train, ]
-X_test = X_all[(n_train+1):nrow(X_all), ]
-#for(l in likelihood_list){X_test = cbind(X_test, likelihood_test_generator(X, y, X_test, l, expand=T))}
+#' expand feature matrix "df_all" and response "y" with respect to "quantity"
+#' new response "y" is binary: greatly reduce computational complexity
+y_index <- rep(1:length(df_all$quantity), times = df_all$quantity)
+df_all <- df_all[rep(1:nrow(df_all), times = df_all$quantity), ]
+y <- rep(rep(c(1, 0), length(y)), times = c(t(cbind(y, df_train_quantity - y))))
+n_train <- length(y)
+n_tot <- length(y_index)
+n_test <- n_tot - n_train
+print(dim(df_all))
 
-my_mae = function(preds, dtrain){
-  labels = getinfo(dtrain, 'label')
-  pred_labels = as.numeric(preds>0.5)
-  mae = mean(abs(labels-pred_labels))
-  return(list(metric = 'mae', value = mae))
-}
+#' construct feature matrices for training and testing
+df_all <- as.matrix(df_all)
+X <- df_all[1:n_train, ]
+X_test <- df_all[(n_train + 1):n_tot, ]
+y_index_cv <- y_index[1:n_train]
+y_index_test <- y_index[(n_train + 1):n_tot]
 
-# block cross-validation
-# take the idea from block bootstrap
-# 21 months in training data
-n_fold = 7
-fold_size = trunc(n_train/n_fold)
-fold_id = c(rep(1:(n_fold-1), each=fold_size), rep(n_fold, n_train-fold_size*(n_fold-1)))
+rm(df_all)
 
-# train xgboost
-# softmax gives class instead of prob
-#param = list(eta = 0.1, 
-#             subsample = 0.5, 
-#             colsample_bytree = 0.9,
-#             max_depth = 6,
-#             silent = 1, 
-#             objective = 'binary:logistic', 
-#             eval_metric = my_mae)
+#' block cross-validation in time-related prediction problem
+#' split 21 months in training dataset into 7 folds
+n_fold <- 7
+fold_size <- trunc(n_train / n_fold)
+fold_id <- c(rep(1:(n_fold - 1), each = fold_size), rep(n_fold, n_train - fold_size * (n_fold-1)))
 
-scores = rep(NaN, (n_fold-1))
-scores_exp = rep(NaN, (n_fold-1))
-
-X_hold_out = X[fold_id==n_fold, ]
-y_hold_out = y[fold_id==n_fold]
-y_index_hold_out = y_index[fold_id==n_fold]
-X_cv = X[fold_id<n_fold, ]
-y_cv = y[fold_id<n_fold]
-y_index_cv = y_index[fold_id<n_fold]
-#for(l in likelihood_list){X_hold_out = cbind(X_hold_out, likelihood_test_generator(X_cv, y_cv, X_hold_out, l, expand=T))}
-fold_id_cv = fold_id[fold_id!=n_fold]
-y_pred_sum = rep(0, length(y_hold_out))
+#' train glm
+#' add prediction of testing dataset from each cv fold
+y_pred_sum <- rep(0, n_test)
+#' mae of each cv fold
+scores <- rep(NaN, n_fold)
+#' store out of fold prediction of training dataset and predicion of testing dataset from cv
+#' used as features in model stacking (2nd layer model)
+y_pred_prob_feat <- rep(NaN, n_tot)
 
 set.seed(0)
-for (i in 1:(n_fold-1)){
-  if (i>1){
+
+for (i in 1:n_fold) {
+  if (i > 1) {
     cat('\n')
   }
   cat(paste('Fold', i, '\n'))
-  X_train = X_cv[fold_id_cv!=i, ]
-  X_val = X_cv[fold_id_cv==i, ]
-  y_train = y_cv[fold_id_cv!=i]
-  y_val = y_cv[fold_id_cv==i]
-  y_index_val = y_index_cv[fold_id_cv==i]
-  #for(l in likelihood_list){X_train = cbind(X_train, likelihood_train_generator(X_train, y_train, l, expand=T))}
-  #for(l in likelihood_list){X_val = cbind(X_val, likelihood_test_generator(X_train, y_train, X_val, l, expand=T))}
-  # fit GLM for each fold
-  dataGLMfold = data.frame(y_train, X_train)
-  glmfitfold = glm(y_train~., data = dataGLMfold, family = binomial())
-  pred_val_exp_label = predict(glmfitfold, newdata=data.frame(X_val), type="response") # fitted prob.
-  scores_exp[i] = mean(abs(y_val-pred_val_exp_label))
-  scores[i] = mean(abs(as.numeric(round(tapply(pred_val_exp_label, y_index_val, sum)))-
-                         tapply(y_val, y_index_val, sum)))
-  cat(paste('\n', 'mae =', scores[i], '\n'))
-  y_pred = predict(glmfitfold, newdata=data.frame(X_hold_out), type="response") # fitted prob.
-  y_pred_sum = y_pred_sum+y_pred
+  X_train <- X[fold_id != i, ]
+  y_train <- y[fold_id != i]
+  X_val <- X[fold_id == i, ]
+  y_val <- y[fold_id == i]
+  y_index_val <- y_index_cv[fold_id == i]
   
+  data_glm <- data.frame(y_train, X_train)
+  model_glm <- glm(y_train ~ ., data = data_glm, family = binomial())
+  
+  y_pred_prob_feat[1:n_train][fold_id == i] <- predict(model_glm, newdata = data.frame(X_val), type = "response")
+  scores[i] <- mean(abs(as.numeric(round(tapply(y_pred_prob_feat[1:n_train][fold_id == i], y_index_val, sum))) - tapply(y_val, y_index_val, sum)))
+  cat(paste('\n', 'mae =', scores[i], '\n'))
+  y_pred <- predict(model_glm, newdata = data.frame(X_test), type = "response")
+  y_pred_sum <- y_pred_sum + y_pred
 }
 
-y_pred = round(tapply(y_pred_sum/(n_fold-1), y_index_hold_out, sum))
-y_hold_out_exp = y_hold_out
-y_hold_out = tapply(y_hold_out, y_index_hold_out, sum)
+y_pred_prob_feat[(n_train + 1):n_tot] <- y_pred_sum / n_fold
+y_pred_prob <- tapply(y_pred_sum / n_fold, y_index_test, sum)
+y_pred <- round(y_pred_prob)
 
-cat(paste(mean(scores), sd(scores), mean(abs(y_pred-y_hold_out)), '\n'))
+cat(paste("mean_score =", mean(scores), "sd_score =", sd(scores), '\n'))
 
-save(y_hold_out, y_hold_out_exp, scores, scores_exp, y_pred, y_pred_sum, file = "DMC16-GLMbase_Exp_oldSC_noLik.RData")
+#' save results from 1st layer model for model stacking
+file_name <- paste("rf_result", feature_type, sep = "_")
+save(y, y_index, scores, y_pred, y_pred_prob, y_pred_prob_feat, ind_drop, file = paste(file_name, ".RData", sep = ""))
