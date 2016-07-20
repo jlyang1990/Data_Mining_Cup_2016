@@ -29,7 +29,7 @@ Feature engineering is always the most important and crutial part in data scienc
 
 - New product group transformation. The new product groups that appear in the test data only are manually imputed by matching them with the existing product groups. To be conservative, the final prediction is a weighted average of the predictions where the imputation is conducted in two different ways.
 
-The script for feature engineering is [*feature_data.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/feature_data.R). The package **data.table** is used to make the syntax concise and computation fast.
+The script for feature engineering is [*feature_data.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/scripts/feature_data.R). The package **data.table** is used to make the syntax concise and computation fast.
 
 ## Modeling strategy
 
@@ -40,15 +40,15 @@ The script for feature engineering is [*feature_data.R*](https://github.com/jlya
   2. Treat the predicted probabilities of return as new features. Combine them with the top 100 important features, and feed them into xgboost to generate second layer predictions.
   3. Bagging the second layer predictions to form the final prediction.
   
-![alt text](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/flow_chart.png)
+![alt text](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/images/flow_chart.png)
 
 - In time series predictor evaluation, a blocked form of cross-validation is more suitable than the traditional one since the former respects the temporal dependence. However, it suffers from the problem of predicting the past based on the future. Another common practice is to reserve a part from the end of time series for testing, and to use the rest for training. This strategy avoids predicting the past, but it does not make full use of the data. To validate the modeling strategy, we combined these two methods. Specifically, we divided the training data into 7 cross-validation folds with 3 months in each fold, and treated the last fold (called holdout set) as a pseudo test set. For the final prediction, we trained the final model on all these 7 cross-validation folds and predicted on the test set.
 
-The scripts for base learner training (first layer prediction) are [*model_xgb.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/model_xgb.R), [*model_dl.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/model_dl.R), [*model_glm.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/model_glm.R) and [*model_rf.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/model_rf.R).
+The scripts for base learner training (first layer prediction) are [*model_xgb.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/scripts/model_xgb.R), [*model_dl.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/scripts/model_dl.R), [*model_glm.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/scripts/model_glm.R) and [*model_rf.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/scripts/model_rf.R).
 
-The scripts for model stacking (second layer prediction) are [*stacking_data.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/stacking_data.R) and [*stacking_xgb.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/stacking_xgb.R).
+The scripts for model stacking (second layer prediction) are [*stacking_data.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/scripts/stacking_data.R) and [*stacking_xgb.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/scripts/stacking_xgb.R).
 
-The script for final prediction generation (third layer prediction) is [*final_result.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/final_result.R).
+The script for final prediction generation (third layer prediction) is [*final_result.R*](https://github.com/jlyang1990/Data_Mining_Cup_2016/blob/master/scripts/final_result.R).
 
 ## Acknowledgement
 
