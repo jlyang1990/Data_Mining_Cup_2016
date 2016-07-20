@@ -1,5 +1,6 @@
 #' build model (1st layer) using deep learning on training dataset and predict on testing dataset
 #' written by Hao Ji
+#' modified by Jilei Yang
 
 rm(list = ls())
 library(h2o)
