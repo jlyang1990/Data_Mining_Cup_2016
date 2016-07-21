@@ -163,7 +163,7 @@ df_all[, min_rrp_per_order := min(rrp), by = orderID]
 #' choice order item: items sharing some similarities in articleID, colorCode, sizeCode, productGroup and rrp
 ChoiceItemWithinOrder <- function(obj) {
   df_all[, sprintf("%s_item_quantity_index", obj) := .N, by = .(eval(parse(text = sprintf("temp_%s", obj))), orderID)]
-  df_all[, sprintf("%s_item_quantity_per_order", obj) := sum(quantity * (eval(parse(text = sprintf("%s_item_quantity_index", obj)) > 1))), by = orderID]
+  df_all[, sprintf("%s_item_quantity_per_order", obj) := sum(quantity * (eval(parse(text = sprintf("%s_item_quantity_index", obj))) > 1)), by = orderID]
   df_all[, sprintf("%s_item_quantity_ratio_per_order", obj) := eval(parse(text = sprintf("%s_item_quantity_per_order", obj))) / quantity_per_order]
   return(df_all)
 }
@@ -304,7 +304,7 @@ df_all[, min_rrp_per_customer := min(rrp), by = customerID]
 #' function to generate total quantity of choice order items per customer, and ratio of quantity of choice order items per customer
 ChoiceItemPerCustomer <- function(obj) {
   #' total quantity of choice order items per customer
-  df_all[, sprintf("%s_item_quantity_per_customer", obj) := sum(quantity * (eval(parse(text = sprintf("%s_item_quantity_index", obj)) > 1))), by = customerID]
+  df_all[, sprintf("%s_item_quantity_per_customer", obj) := sum(quantity * (eval(parse(text = sprintf("%s_item_quantity_index", obj))) > 1)), by = customerID]
   #' ratio of quantity of choice order items per customer
   df_all[, sprintf("%s_item_quantity_ratio_per_customer", obj) := eval(parse(text = sprintf("%s_item_quantity_per_customer", obj))) / quantity_per_customer]
   return(df_all)
@@ -445,6 +445,7 @@ temp[, c("orderDate_int", "customerID") := NULL]
 setkey(temp, orderID)
 setkey(df_all, orderID)
 df_all <- temp[df_all]
+rm(temp)
 
 #' function to generate time difference between choice order items across order per customer
 ChoiceItemAcrossOrder <- function(obj) {
@@ -463,7 +464,7 @@ ChoiceItemAcrossOrder <- function(obj) {
 
 #' implement ChoiceItemAcrossOrder to choice order item list
 for(choice_item in c(choice_item_list, "acs", "acsp")) {
-  df_all <- ChoiceItemAcrossOrder(df_all[, sprintf("temp_%s", choice_item)], choice_item)
+  df_all <- ChoiceItemAcrossOrder(choice_item)
   cat(sprintf("Complete ChoiceItemAcrossOrder(\"%s\")", choice_item), "\n")
 }
 
