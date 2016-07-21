@@ -167,8 +167,8 @@ if(drop_gift == TRUE) {
 y_pred_prob <- tapply(y_pred_sum / n_fold, y_index_test, sum)
 y_pred <- round(y_pred_prob)
 
-library(Ckmeans.1d.dp)
 #' importance matrix of xgboost model corresponding to the last cv fold
+library(Ckmeans.1d.dp)
 importance_matrix <- xgb.importance(colnames(X), model = model_xgb)
 
 cat(paste("mean_score =", mean(scores), "sd_score =", sd(scores), '\n'))
@@ -176,5 +176,5 @@ cat(paste("mean_score =", mean(scores), "sd_score =", sd(scores), '\n'))
 #' save results from 1st layer model for model stacking
 save_list <- c(drop_feat, drop_gift, drop_low_freq_cust, add_likelihood_cust, add_likelihood_month)
 names(save_list) <- c("drop_feat", "drop_gift", "drop_low_freq_cust", "add_likelihood_cust", "add_likelihood_month")
-file_name <- paste("xgb_result", feature_type, ifelse(length(l[l == T]) == 0, "base", names(l[l == T])), xgb_subsample * 100, xgb_colsample * 100, sep = "_")
+file_name <- paste("xgb_result", feature_type, ifelse(length(save_list[save_list == TRUE]) == 0, "base", names(save_list[save_list == TRUE])), xgb_subsample * 100, xgb_colsample * 100, sep = "_")
 save(y, y_index, scores, y_pred, y_pred_prob, y_pred_prob_feat, importance_matrix, ind_drop, file = paste(file_name, ".RData", sep = ""))
