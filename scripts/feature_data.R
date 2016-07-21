@@ -442,9 +442,7 @@ temp <- df_all[, .(orderDate_int = unique(orderDate_int)), by = .(customerID, or
 temp[, orderDate_diff_next := c(diff(orderDate_int), 1000), by = customerID]
 temp[, orderDate_diff_prev := c(1000, diff(orderDate_int)), by = customerID]
 temp[, c("orderDate_int", "customerID") := NULL]
-setkey(temp, orderID)
-setkey(df_all, orderID)
-df_all <- temp[df_all]
+df_all <- merge(df_all, temp, all.x = TRUE, by = "orderID", sort = FALSE)
 rm(temp)
 
 #' function to generate time difference between choice order items across order per customer
@@ -456,10 +454,7 @@ ChoiceItemAcrossOrder <- function(obj) {
   temp[, sprintf("%s_item_orderDate_diff_next", obj) := c(diff(orderDate_int), 1000), by = .(customerID, eval(parse(text = sprintf("temp_%s", obj))))]
   temp[, sprintf("%s_item_orderDate_diff_prev", obj) := c(1000, diff(orderDate_int)), by = .(customerID, eval(parse(text = sprintf("temp_%s", obj))))]
   temp[, c("orderDate_int", "customerID") := NULL]
-  setkeyv(temp, c((sprintf("temp_%s", obj)), "orderID"))
-  setkeyv(df_all, c((sprintf("temp_%s", obj)), "orderID"))
-  df_all <- temp[df_all]
-  return(df_all)
+  merge(df_all, temp, all.x = TRUE, by = c("orderID", (sprintf("temp_%s", obj))), sort = FALSE)
 }
 
 #' implement ChoiceItemAcrossOrder to choice order item list
