@@ -1,0 +1,9 @@
+caret: 6.0.70
+stringr: 1.0.0
+data.table: 1.9.6
+xgboost: 0.4.3
+h2o: 3.8.2.6
+e1071: 1.6.7
+randomForest: 4.6.12
+doParallel: 1.0.10
+foreach: 1.4.3
