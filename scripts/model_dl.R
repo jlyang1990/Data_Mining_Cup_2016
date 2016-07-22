@@ -29,7 +29,7 @@ load(sprintf("xgb_result_%s_base_95_80.RData", feature_type))
 n_feat <- 300
 imp_var <- importance_matrix[1:n_feat, 1]
 df_all <- df_all[, (names(df_all) %in% imp_var)]
-print(paste("Most important", ncol(df_all), "features are used.\n", sep=" "))
+print(paste("Most important", ncol(df_all), "features are used.", sep=" "))
 
 #' block cross-validation in time-related prediction problem
 #' split 21 months in training dataset into 7 folds
@@ -128,4 +128,4 @@ h2o.shutdown(prompt = FALSE)
 
 #' save results from 1st layer model for model stacking
 file_name <- paste("dl_result", feature_type, sep = "_")
-save(y, y_index, y_pred_prob_feat, allpara, importance_matrix, ind_drop, file = paste(file_name, ".RData", sep = ""))
+save(y, y_index, y_pred_prob_feat, all_para, importance_matrix, ind_drop, file = paste(file_name, ".RData", sep = ""))
