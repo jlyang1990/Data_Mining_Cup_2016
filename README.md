@@ -52,10 +52,10 @@ The script for final prediction generation (third layer prediction) is [*final_r
 
 ## Acknowledgement
 
-There are five other teammates, without whom the competition is impossible to be finished: Minjie Fan, Hao Ji, Qi Gao, Nana Wang and Chunzhe Zhang.
+There are five other teammates, without whom the competition is impossible to be finished: [Minjie Fan](https://github.com/minjay), [Hao Ji](https://github.com/dmchris), [Qi Gao](https://github.com/qigaostella), [Nana Wang](https://github.com/nnaw) and [Chunzhe Zhang](https://github.com/ChunzheJason).
 
 We would like to express our special thanks to Prof. Hao Chen, who provided us with very insightful advice and practical guidance. We are also thankful for the support we get from the Department of Statistics at UC Davis, and also for Prudsys AG that held and sponsored this interesting competition.
 
-I would personally thank Minjie Fan and Hao Ji for writing a detailed report to summarize our work in DMC 2016. Most of the descriptions in README are from this report. The report can be reached in [Minjie Fan's Github](https://github.com/minjay/DMC2016).
+I would personally thank Minjie Fan and Hao Ji for writing a detailed report to summarize our work in DMC 2016. Most of the descriptions in README are from this report. The report can be accessed [here](https://github.com/minjay/DMC2016).
 
 **At last, I would like to share one saying from a sucessful Kaggler with you: *''Features make difference and ensemble makes you win.''* This is exactly what we have learned from 2016 Data Mining Cup.**
